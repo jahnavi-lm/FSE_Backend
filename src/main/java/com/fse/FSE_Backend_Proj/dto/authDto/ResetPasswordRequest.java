@@ -1,4 +1,4 @@
-package com.fse.FSE_Backend_Proj.dto;
+package com.fse.FSE_Backend_Proj.dto.authDto;
 
 import lombok.Data;
 

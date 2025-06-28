@@ -1,6 +1,6 @@
-package com.fse.FSE_Backend_Proj.dto;
+package com.fse.FSE_Backend_Proj.dto.authDto;
 
-import com.fse.FSE_Backend_Proj.controller.Role;
+import com.fse.FSE_Backend_Proj.model.enums.UserRole;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -9,5 +9,5 @@ import lombok.Setter;
 public class LoginRequest {
     private String email;
     private String password;
-    private Role role;
+    private UserRole role;
 }
