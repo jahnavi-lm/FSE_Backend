@@ -1,7 +1,7 @@
 package com.fse.FSE_Backend_Proj.Service;
 
 import com.fse.FSE_Backend_Proj.Repository.UserRepository;
-import com.fse.FSE_Backend_Proj.controller.Role;
+import com.fse.FSE_Backend_Proj.enums.Role;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;

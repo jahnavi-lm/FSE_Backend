@@ -1,6 +1,6 @@
 package com.fse.FSE_Backend_Proj.entites;
 
-import com.fse.FSE_Backend_Proj.controller.Role;
+import com.fse.FSE_Backend_Proj.enums.Role;
 import jakarta.persistence.*;
 import lombok.*;
 

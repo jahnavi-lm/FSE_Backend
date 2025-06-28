@@ -1,6 +1,6 @@
 package com.fse.FSE_Backend_Proj.Repository;
 
-import com.fse.FSE_Backend_Proj.controller.Role;
+import com.fse.FSE_Backend_Proj.enums.Role;
 import com.fse.FSE_Backend_Proj.entites.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 
