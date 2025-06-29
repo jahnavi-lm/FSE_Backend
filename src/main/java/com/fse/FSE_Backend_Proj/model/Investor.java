@@ -78,4 +78,7 @@ public class Investor {
     public void preUpdate() {
         updatedAt = LocalDateTime.now();
     }
+
+
+
 }

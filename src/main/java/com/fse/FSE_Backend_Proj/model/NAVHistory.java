@@ -54,4 +54,7 @@ public class NAVHistory {
     public void prePersist() {
         this.createdAt = LocalDateTime.now();
     }
+
+
+
 }

@@ -60,4 +60,5 @@ public class Transaction {
     public void onTransaction() {
         this.txnDate = LocalDateTime.now();
     }
+
 }

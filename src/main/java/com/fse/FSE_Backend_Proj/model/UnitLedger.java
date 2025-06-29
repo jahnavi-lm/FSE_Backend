@@ -50,9 +50,15 @@ public class UnitLedger {
     @Column(name = "last_updated", nullable = false)
     private LocalDateTime lastUpdated;
 
+
+
     @PrePersist
     @PreUpdate
     public void updateTimestamp() {
         this.lastUpdated = LocalDateTime.now();
     }
+
+
+
+
 }
