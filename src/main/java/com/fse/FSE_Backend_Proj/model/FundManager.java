@@ -2,10 +2,7 @@ package com.fse.FSE_Backend_Proj.model;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 @Entity
 @Table(name = "fund_managers")
@@ -16,7 +13,6 @@ import lombok.NoArgsConstructor;
 public class FundManager {
 
     @Id
-    @Column(name = "id")
     private String id; // FK to users.id
 
     @OneToOne(fetch = FetchType.LAZY)
@@ -25,7 +21,7 @@ public class FundManager {
     private User user;
 
     @NotBlank(message = "Employee code is required")
-    @Column(name = "employee_code", nullable = false)
+    @Column(name = "employee_code", nullable = false, unique = true)
     private String employeeCode;
 
     @NotNull(message = "AMC must be assigned")
@@ -45,6 +41,5 @@ public class FundManager {
     @Column(columnDefinition = "TEXT")
     private String bio;
 
-    @Column(name = "is_certified", nullable = false)
-    private boolean isCertified;
+
 }

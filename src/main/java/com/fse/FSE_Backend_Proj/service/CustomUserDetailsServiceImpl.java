@@ -1,9 +1,9 @@
-package com.fse.FSE_Backend_Proj.Service;
+package com.fse.FSE_Backend_Proj.service;
 
-import com.fse.FSE_Backend_Proj.Repository.UserRepository;
+import com.fse.FSE_Backend_Proj.repository.UserRepository;
 import com.fse.FSE_Backend_Proj.model.enums.UserRole;
+import com.fse.FSE_Backend_Proj.model.User;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
@@ -19,10 +19,10 @@ public class CustomUserDetailsServiceImpl {
         String email = parts[0];
         UserRole userRole = UserRole.valueOf(parts[1].toUpperCase());
 
-        var user = userRepository.findByEmailAndRole(email, userRole)
+        User user = userRepository.findByEmailAndRole(email, userRole)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
 
-        return User.builder()
+        return org.springframework.security.core.userdetails.User.builder()
                 .username(compositeKey)
                 .password(user.getPasswordHash())
                 .roles(userRole.name())

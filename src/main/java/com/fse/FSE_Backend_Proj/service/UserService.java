@@ -1,7 +1,7 @@
-package com.fse.FSE_Backend_Proj.Service;
+package com.fse.FSE_Backend_Proj.service;
 
-import com.fse.FSE_Backend_Proj.Repository.AMCRepository;
-import com.fse.FSE_Backend_Proj.Repository.UserRepository;
+import com.fse.FSE_Backend_Proj.repository.AMCRepository;
+import com.fse.FSE_Backend_Proj.repository.UserRepository;
 import com.fse.FSE_Backend_Proj.model.enums.UserRole;
 import com.fse.FSE_Backend_Proj.model.User;
 import lombok.RequiredArgsConstructor;
@@ -44,4 +44,3 @@ public class UserService {
                 .orElseThrow(() -> new RuntimeException("User not found"));
     }
 }
-

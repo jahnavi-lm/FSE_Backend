@@ -1,7 +1,7 @@
 
 package com.fse.FSE_Backend_Proj.util;
 
-import com.fse.FSE_Backend_Proj.Service.CustomUserDetailsService;
+import com.fse.FSE_Backend_Proj.service.CustomUserDetailsService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;

@@ -1,4 +1,4 @@
-package com.fse.FSE_Backend_Proj.Service;
+package com.fse.FSE_Backend_Proj.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -17,4 +17,3 @@ public class CustomUserDetailsService implements UserDetailsService {
         return customUserDetailsServiceImpl.loadUserByCompositeKey(username);
     }
 }
-

@@ -2,10 +2,7 @@ package com.fse.FSE_Backend_Proj.model;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.time.LocalDateTime;
 
@@ -18,8 +15,12 @@ import java.time.LocalDateTime;
 public class AMC {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
     private String id;
+
+    @OneToOne(fetch = FetchType.LAZY)
+    @MapsId
+    @JoinColumn(name = "id")
+    private User user;
 
     @NotBlank(message = "AMC name is required")
     @Size(min = 2, max = 150, message = "AMC name must be between 2 and 150 characters")
@@ -50,6 +51,10 @@ public class AMC {
 
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
+
+    // ✅ Optimistic Locking Version Column
+    @Version
+    private Long version;
 
     @PrePersist
     public void onCreate() {

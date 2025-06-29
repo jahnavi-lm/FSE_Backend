@@ -1,6 +1,6 @@
 package com.fse.FSE_Backend_Proj.controller;
 
-import com.fse.FSE_Backend_Proj.Service.UserService;
+import com.fse.FSE_Backend_Proj.service.UserService;
 import com.fse.FSE_Backend_Proj.dto.authDto.LoginRequest;
 import com.fse.FSE_Backend_Proj.dto.authDto.LoginResponse;
 import com.fse.FSE_Backend_Proj.dto.authDto.RegisterRequest;
@@ -13,10 +13,12 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequiredArgsConstructor
+@RequestMapping("/api/auth")
 public class AuthController {
 
     private final UserService userService;
