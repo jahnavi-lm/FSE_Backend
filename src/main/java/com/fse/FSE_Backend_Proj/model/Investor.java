@@ -1,10 +1,7 @@
 package com.fse.FSE_Backend_Proj.model;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -19,8 +16,7 @@ import java.time.LocalDateTime;
 public class Investor {
 
     @Id
-    @Column(name = "id")
-    private String id; // User ID (FK)
+    private String id; // FK from User
 
     @OneToOne(fetch = FetchType.LAZY)
     @MapsId
@@ -40,7 +36,7 @@ public class Investor {
 
     private String address;
 
-    @Column(name = "guardian_name", nullable = true)
+    @Column(name = "guardian_name")
     private String guardianName;
 
     private String occupation;
@@ -48,7 +44,7 @@ public class Investor {
     @Column(name = "annual_income")
     private BigDecimal annualIncome;
 
-    @Column(name = "nominee_name", nullable = true)
+    @Column(name = "nominee_name")
     private String nomineeName;
 
     @Column(name = "bank_account_no", nullable = false)
