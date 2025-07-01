@@ -1,12 +1,14 @@
 
 package com.fse.FSE_Backend_Proj.controller;
 
+import com.fse.FSE_Backend_Proj.model.Investor;
 import com.fse.FSE_Backend_Proj.service.InvestorService;
 import com.fse.FSE_Backend_Proj.dto.investorDto.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 @RestController
@@ -20,6 +22,21 @@ public class InvestorController {
     public ResponseEntity<InvestmentResponse> invest(@RequestBody InvestmentRequest request) {
         return ResponseEntity.ok(investorService.invest(request));
     }
+    @GetMapping("/wallet-value/{investorId}")
+    public ResponseEntity<WalletValueResponse> getWalletValue(@PathVariable String investorId) {
+        BigDecimal walletValue = investorService.calculateWalletValue(investorId);
+        return ResponseEntity.ok(new WalletValueResponse(walletValue));
+    }
+
+    @PostMapping("/create")
+    public ResponseEntity<Investor> createInvestor(@RequestBody InvestorCreateRequest request) {
+        Investor created = investorService.createInvestor(request);
+        return ResponseEntity.ok(created);
+    }
+
+
+
+
 
     @PostMapping("/redeem")
     public ResponseEntity<RedeemResponse> redeem(@RequestBody RedeemRequest request) {

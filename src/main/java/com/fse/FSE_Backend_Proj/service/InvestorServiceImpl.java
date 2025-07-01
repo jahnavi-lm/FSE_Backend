@@ -5,6 +5,7 @@ import com.fse.FSE_Backend_Proj.model.*;
 import com.fse.FSE_Backend_Proj.model.enums.TransactionType;
 import com.fse.FSE_Backend_Proj.repository.FundSchemeRepository;
 import com.fse.FSE_Backend_Proj.repository.InvestorRepository;
+import com.fse.FSE_Backend_Proj.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -24,6 +25,7 @@ public class InvestorServiceImpl implements InvestorService {
     private final com.fse.FSE_Backend_Proj.repository.TransactionRepository transactionRepository;
     private final com.fse.FSE_Backend_Proj.repository.UnitLedgerRepository unitLedgerRepository;
     private final com.fse.FSE_Backend_Proj.repository.NAVHistoryRepository navHistoryRepository;
+    private final UserRepository userRepository;
 
     @Override
     public InvestmentResponse invest(InvestmentRequest request) {
@@ -68,6 +70,11 @@ public class InvestorServiceImpl implements InvestorService {
         ledger.setLastUpdated(LocalDateTime.now());
 
         unitLedgerRepository.save(ledger);
+
+        BigDecimal currentBalance = BigDecimal.valueOf(investor.getWalletBalance());
+        BigDecimal updatedBalance = currentBalance.subtract(amount);
+        investor.setWalletBalance(updatedBalance.doubleValue());
+        investorRepository.save(investor);
 
         return new InvestmentResponse("Investment successful", units.doubleValue(), nav.doubleValue(), txn.getTxnDate());
     }
@@ -115,12 +122,18 @@ public class InvestorServiceImpl implements InvestorService {
         ledger.setLastUpdated(LocalDateTime.now());
         unitLedgerRepository.save(ledger);
 
+        BigDecimal currentBalance = BigDecimal.valueOf(investor.getWalletBalance());
+        BigDecimal updatedBalance = currentBalance.add(redeemAmount);
+        investor.setWalletBalance(updatedBalance.doubleValue());
+        investorRepository.save(investor);
+
         return new RedeemResponse(
                 "Redemption successful",
                 redeemAmount.doubleValue(), // amount credited
                 nav.doubleValue(),          // nav at redemption
                 txn.getTxnDate()            // transaction time
         );
+
     }
 
 
@@ -228,4 +241,42 @@ public class InvestorServiceImpl implements InvestorService {
 
         return new KycVerificationResponse("KYC verified successfully" , true);
     }
+
+    @Override
+    public BigDecimal calculateWalletValue(String investorId) {
+        Investor investor = investorRepository.findById(investorId)
+                .orElseThrow(() -> new RuntimeException("Investor not found"));
+        return BigDecimal.valueOf(investor.getWalletBalance());
+    }
+
+    @Override
+    public Investor createInvestor(InvestorCreateRequest request) {
+        User user = userRepository.findById(request.getUserId())
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        Investor investor = Investor.builder()
+                .id(user.getId()) // Map userId
+                .user(user)
+                .kycStatus(false)
+                .kycDocUrl(request.getKycDocUrl())
+                .dob(request.getDob())
+                .panNumber(request.getPanNumber())
+                .address(request.getAddress())
+                .guardianName(request.getGuardianName())
+                .occupation(request.getOccupation())
+                .annualIncome(request.getAnnualIncome())
+                .nomineeName(request.getNomineeName())
+                .bankAccountNo(request.getBankAccountNo())
+                .ifscCode(request.getIfscCode())
+                .walletBalance(2000000.0) // Default or skip if PrePersist works
+                .build();
+
+        return investorRepository.save(investor);
+    }
+
+
+
+
+
+
 }
