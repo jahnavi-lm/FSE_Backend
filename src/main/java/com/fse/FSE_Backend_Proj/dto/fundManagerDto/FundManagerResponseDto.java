@@ -4,6 +4,8 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.List;
+
 @Getter
 @Setter
 @Builder
@@ -13,5 +15,4 @@ public class FundManagerResponseDto {
     private String qualification;
     private int experienceYears;
     private String bio;
-    private String amcId;
 }
