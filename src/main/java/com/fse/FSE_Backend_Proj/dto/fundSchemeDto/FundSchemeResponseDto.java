@@ -1,5 +1,6 @@
 package com.fse.FSE_Backend_Proj.dto.fundSchemeDto;
 
+import com.fse.FSE_Backend_Proj.dto.fundSchemeDto.CompanyInvestmentDto;
 import com.fse.FSE_Backend_Proj.model.enums.FundSchemeStatus;
 import com.fse.FSE_Backend_Proj.model.enums.FundSchemeType;
 import com.fse.FSE_Backend_Proj.model.enums.RiskLevel;
@@ -10,6 +11,7 @@ import lombok.Setter;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Getter
 @Setter
@@ -35,4 +37,6 @@ public class FundSchemeResponseDto {
     private String managerId;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+    private List<CompanyInvestmentDto> companiesInvestedIn;
+    private List<String> investorIds;
 }

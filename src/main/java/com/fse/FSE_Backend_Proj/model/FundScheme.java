@@ -13,6 +13,7 @@ import lombok.NoArgsConstructor;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 @Table(name = "fund_schemes")
@@ -20,7 +21,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class FundScheme {
+public class    FundScheme {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -34,7 +35,7 @@ public class FundScheme {
     @NotNull(message = "Fund type is required")
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private FundSchemeType type; // ENUM: EQUITY, DEBT, HYBRID, ELSS, INDEX
+    private FundSchemeType type;
 
     @NotBlank(message = "Investment objective is required")
     @Column(columnDefinition = "TEXT")
@@ -53,7 +54,7 @@ public class FundScheme {
     @NotNull
     @Enumerated(EnumType.STRING)
     @Column(name = "risk_level")
-    private RiskLevel riskLevel; // ENUM: LOW, MODERATE, HIGH
+    private RiskLevel riskLevel;
 
     @DecimalMin(value = "0.0", inclusive = true)
     @Column(name = "expense_ratio")
@@ -65,7 +66,7 @@ public class FundScheme {
 
     @Min(value = 0)
     @Column(name = "lock_in_period")
-    private Integer lockInPeriod; // nullable
+    private Integer lockInPeriod;
 
     @DecimalMin(value = "0.0", inclusive = true)
     @Column(name = "min_investment", nullable = false)
@@ -97,13 +98,19 @@ public class FundScheme {
 
     @NotNull
     @Enumerated(EnumType.STRING)
-    private FundSchemeStatus status; // ENUM: ACTIVE, CLOSED, MERGED
+    private FundSchemeStatus status;
 
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
 
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
+
+    @OneToMany(mappedBy = "fundScheme", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<CompanyInvestment> companiesInvestedIn;
+
+    @OneToMany(mappedBy = "fundScheme", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Investor> investors;
 
     @PrePersist
     public void onCreate() {

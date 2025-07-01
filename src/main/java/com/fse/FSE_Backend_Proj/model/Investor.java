@@ -74,4 +74,9 @@ public class Investor {
     public void preUpdate() {
         updatedAt = LocalDateTime.now();
     }
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "fund_scheme_id")
+    private FundScheme fundScheme;
+
 }

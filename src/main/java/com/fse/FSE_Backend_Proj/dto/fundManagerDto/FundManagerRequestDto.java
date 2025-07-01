@@ -4,6 +4,8 @@ import jakarta.validation.constraints.*;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.List;
+
 @Getter
 @Setter
 public class FundManagerRequestDto {
@@ -20,10 +22,7 @@ public class FundManagerRequestDto {
     @Size(max = 1000, message = "Bio should be within 1000 characters")
     private String bio;
 
-
     @NotBlank(message = "User ID is required")
     private String userId;
 
-    @NotBlank(message = "AMC ID is required")
-    private String amcId;
 }

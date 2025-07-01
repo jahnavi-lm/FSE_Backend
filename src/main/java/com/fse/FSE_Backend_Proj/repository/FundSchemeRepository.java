@@ -9,4 +9,5 @@ import java.util.List;
 @Repository
 public interface FundSchemeRepository extends JpaRepository<FundScheme, String> {
     List<FundScheme> findByAmc_Id(String amcId);
+    List<FundScheme> findByManager_Id(String managerId);
 }
