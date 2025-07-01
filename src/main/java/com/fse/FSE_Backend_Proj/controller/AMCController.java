@@ -49,4 +49,5 @@ public class AMCController {
         amcService.deleteAmc(id);
         return ResponseEntity.noContent().build();
     }
+
 }

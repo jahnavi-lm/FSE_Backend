@@ -13,4 +13,5 @@ public interface FundSchemeService {
     FundSchemeResponseDto update(String id, FundSchemeRequestDto dto);
     void delete(String id);
     FundSchemeResponseDto assignManager(String schemeId, String managerId);
+    List<FundSchemeResponseDto> getByManager(String managerId);
 }

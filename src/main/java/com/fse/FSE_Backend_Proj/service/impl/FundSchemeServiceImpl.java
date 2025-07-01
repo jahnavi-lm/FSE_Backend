@@ -3,16 +3,16 @@ package com.fse.FSE_Backend_Proj.service.impl;
 import com.fse.FSE_Backend_Proj.dto.fundSchemeDto.FundSchemeRequestDto;
 import com.fse.FSE_Backend_Proj.dto.fundSchemeDto.FundSchemeResponseDto;
 import com.fse.FSE_Backend_Proj.exception.ResourceNotFoundException;
-import com.fse.FSE_Backend_Proj.model.AMC;
-import com.fse.FSE_Backend_Proj.model.FundManager;
-import com.fse.FSE_Backend_Proj.model.FundScheme;
+import com.fse.FSE_Backend_Proj.model.*;
 import com.fse.FSE_Backend_Proj.repository.AMCRepository;
 import com.fse.FSE_Backend_Proj.repository.FundManagerRepository;
 import com.fse.FSE_Backend_Proj.repository.FundSchemeRepository;
+import com.fse.FSE_Backend_Proj.repository.InvestorRepository;
 import com.fse.FSE_Backend_Proj.service.FundSchemeService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -23,6 +23,7 @@ public class FundSchemeServiceImpl implements FundSchemeService {
     private final FundSchemeRepository fundSchemeRepo;
     private final AMCRepository amcRepo;
     private final FundManagerRepository fundManagerRepo;
+    private final InvestorRepository investorRepo;
 
     @Override
     public FundSchemeResponseDto create(String amcId, FundSchemeRequestDto dto) {
@@ -46,6 +47,8 @@ public class FundSchemeServiceImpl implements FundSchemeService {
                 .category(dto.getCategory())
                 .status(dto.getStatus())
                 .amc(amc)
+                .investors(new ArrayList<>())
+                .companiesInvestedIn(new ArrayList<>())
                 .build();
 
         return toDto(fundSchemeRepo.save(fs));
@@ -84,6 +87,30 @@ public class FundSchemeServiceImpl implements FundSchemeService {
         fs.setLaunchDate(dto.getLaunchDate());
         fs.setCategory(dto.getCategory());
         fs.setStatus(dto.getStatus());
+
+        List<CompanyInvestment> investments = dto.getCompaniesInvestedIn().stream()
+                .map(c -> CompanyInvestment.builder()
+                        .companyName(c.getCompanyName())
+                        .investedAmount(c.getInvestedAmount())
+                        .numberOfStocks(c.getNumberOfStocks())
+                        .investmentDate(c.getInvestmentDate())
+                        .fundScheme(fs)
+                        .build())
+                .toList();
+        fs.setCompaniesInvestedIn(investments);
+
+        if (dto.getInvestorIds() != null) {
+            List<Investor> investors = dto.getInvestorIds().stream()
+                    .map(idVal -> investorRepo.findById(idVal)
+                            .orElseThrow(() -> new ResourceNotFoundException("Investor not found with ID: " + idVal)))
+                    .toList();
+
+            investors.forEach(inv -> inv.setFundScheme(fs));
+            fs.setInvestors(investors);
+        } else {
+            fs.setInvestors(new ArrayList<>());
+        }
+
         return toDto(fundSchemeRepo.save(fs));
     }
 
@@ -130,5 +157,11 @@ public class FundSchemeServiceImpl implements FundSchemeService {
                 .updatedAt(fs.getUpdatedAt())
                 .build();
     }
+
+    @Override
+    public List<FundSchemeResponseDto> getByManager(String managerId) {
+        return fundSchemeRepo.findByManager_Id(managerId).stream().map(this::toDto).collect(Collectors.toList());
+    }
+
 }
 
