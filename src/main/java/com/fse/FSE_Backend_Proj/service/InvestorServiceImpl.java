@@ -71,6 +71,10 @@ public class InvestorServiceImpl implements InvestorService {
 
         unitLedgerRepository.save(ledger);
 
+
+        scheme.setAum(scheme.getAum().add(amount)); //add fund_scheme aum method
+        fundSchemeRepository.save(scheme);
+
         BigDecimal currentBalance = BigDecimal.valueOf(investor.getWalletBalance());
         BigDecimal updatedBalance = currentBalance.subtract(amount);
         investor.setWalletBalance(updatedBalance.doubleValue());
@@ -84,7 +88,6 @@ public class InvestorServiceImpl implements InvestorService {
         Investor investor = investorRepository.findById(request.getInvestorId())
                 .orElseThrow(() -> new RuntimeException("Investor not found"));
 
-
         FundScheme scheme = fundSchemeRepository.findById(String.valueOf(UUID.fromString(String.valueOf(request.getSchemeId()))))
                 .orElseThrow(() -> new RuntimeException("Scheme not found"));
 
@@ -96,8 +99,7 @@ public class InvestorServiceImpl implements InvestorService {
             throw new RuntimeException("Insufficient units to redeem");
         }
 
-        NAVHistory latestNav = navHistoryRepository.findTopBySchemeIdOrderByDateDesc
-                        (scheme.getId())
+        NAVHistory latestNav = navHistoryRepository.findTopBySchemeIdOrderByDateDesc(scheme.getId())
                 .orElseThrow(() -> new RuntimeException("NAV not found"));
 
         BigDecimal nav = latestNav.getNav();
@@ -105,7 +107,6 @@ public class InvestorServiceImpl implements InvestorService {
         if (redeemAmount.compareTo(BigDecimal.ZERO) <= 0) {
             throw new RuntimeException("Redeem amount must be greater than 0");
         }
-
 
         Transaction txn = Transaction.builder()
                 .investor(investor)
@@ -122,19 +123,26 @@ public class InvestorServiceImpl implements InvestorService {
         ledger.setLastUpdated(LocalDateTime.now());
         unitLedgerRepository.save(ledger);
 
+        // 🟢 Update Investor Wallet
         BigDecimal currentBalance = BigDecimal.valueOf(investor.getWalletBalance());
         BigDecimal updatedBalance = currentBalance.add(redeemAmount);
         investor.setWalletBalance(updatedBalance.doubleValue());
         investorRepository.save(investor);
 
+        // 🟡 Update AUM in FundScheme
+        BigDecimal currentAum = scheme.getAum() != null ? scheme.getAum() : BigDecimal.ZERO;
+        BigDecimal updatedAum = currentAum.subtract(redeemAmount).max(BigDecimal.ZERO);
+        scheme.setAum(updatedAum);
+        fundSchemeRepository.save(scheme);
+
         return new RedeemResponse(
                 "Redemption successful",
-                redeemAmount.doubleValue(), // amount credited
-                nav.doubleValue(),          // nav at redemption
-                txn.getTxnDate()            // transaction time
+                redeemAmount.doubleValue(),
+                nav.doubleValue(),
+                txn.getTxnDate()
         );
-
     }
+
 
 
     @Override
