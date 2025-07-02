@@ -1,0 +1,18 @@
+package com.fse.FSE_Backend_Proj.dto.fundManagerDto;
+
+import lombok.Builder;
+import lombok.Getter;
+import lombok.Setter;
+
+import java.util.List;
+
+@Getter
+@Setter
+@Builder
+public class FundManagerResponseDto {
+    private String id;
+    private String employeeCode;
+    private String qualification;
+    private int experienceYears;
+    private String bio;
+}
