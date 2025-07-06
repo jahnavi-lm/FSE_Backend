@@ -21,7 +21,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class    FundScheme {
+public class FundScheme {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)

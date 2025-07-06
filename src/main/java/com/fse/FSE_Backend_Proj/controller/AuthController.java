@@ -15,6 +15,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+
 
 @RestController
 @RequiredArgsConstructor
@@ -38,14 +40,23 @@ public class AuthController {
 
     @PostMapping("/login")
     public ResponseEntity<LoginResponse> login(@RequestBody LoginRequest loginRequest) {
-        String userKey = loginRequest.getEmail() + ":" + loginRequest.getRole().name();
+        User user = userService.getUserByEmail(loginRequest.getEmail());
 
+        if (user == null) {
+            throw new UsernameNotFoundException("User not found");
+        }
+
+        // Authenticate using "email:ROLE" format, because that's how it's stored in DB (UserDetails)
+        String userKey = loginRequest.getEmail() + ":" + user.getRole().name();
         authManager.authenticate(new UsernamePasswordAuthenticationToken(userKey, loginRequest.getPassword()));
-        String token = jwtUtil.generateToken(userKey);
-        User user = userService.getUserByEmailAndRole(loginRequest.getEmail(), loginRequest.getRole());
+
+        // Generate token using only email and role separately
+        String token = jwtUtil.generateToken(user.getEmail(), user.getRole().name());
 
         return ResponseEntity.ok(new LoginResponse(token, user));
     }
+
+
 
     @PostMapping("/forgot-password")
     public ResponseEntity<String> forgotPassword(@RequestBody ResetPasswordRequest request) {

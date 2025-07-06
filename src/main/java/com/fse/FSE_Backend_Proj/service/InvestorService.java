@@ -9,7 +9,9 @@ import java.util.List;
 public interface InvestorService {
 
     InvestmentResponse invest(InvestmentRequest request);
+
     BigDecimal calculateWalletValue(String investorId);
+
     RedeemResponse redeem(RedeemRequest request);
 
     InvestorPortfolioResponse getPortfolio(String investorId);
@@ -27,7 +29,18 @@ public interface InvestorService {
     InvestorKycStatusDto getKycStatus(String investorId);
 
     KycVerificationResponse verifyKyc(KycVerificationRequest request);
+
+
+    boolean existsByPanNumber(String panNumber);
+
+
     Investor createInvestor(InvestorCreateRequest request);
 
+    InvestorSummaryResponse getInvestmentSummary(String investorId);
+
+    List<FundInvestmentSummaryDto> getFundWiseSummary(String investorId);
+
+    List<FundSchemeListDto> getAllAvailableSchemes();
 }
+
 

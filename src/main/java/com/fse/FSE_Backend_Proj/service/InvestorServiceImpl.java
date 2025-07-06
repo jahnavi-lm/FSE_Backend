@@ -1,6 +1,7 @@
 package com.fse.FSE_Backend_Proj.service;
 
 import com.fse.FSE_Backend_Proj.dto.investorDto.*;
+import com.fse.FSE_Backend_Proj.exception.DuplicatePanException;
 import com.fse.FSE_Backend_Proj.model.*;
 import com.fse.FSE_Backend_Proj.model.enums.TransactionType;
 import com.fse.FSE_Backend_Proj.repository.FundSchemeRepository;
@@ -256,11 +257,29 @@ public class InvestorServiceImpl implements InvestorService {
                 .orElseThrow(() -> new RuntimeException("Investor not found"));
         return BigDecimal.valueOf(investor.getWalletBalance());
     }
+//    @Override
+//    public boolean getInvestorById(String investorId) {
+//        System.out.println("API called inside getInvestorById");
+//        return investorRepository.existsById(investorId);
+//    }
+
+
+    @Override
+    public boolean existsByPanNumber(String panNumber) {
+        return investorRepository.existsByPanNumber(panNumber);
+    }
+
 
     @Override
     public Investor createInvestor(InvestorCreateRequest request) {
         User user = userRepository.findById(request.getUserId())
                 .orElseThrow(() -> new RuntimeException("User not found"));
+
+        if (investorRepository.existsByPanNumber(request.getPanNumber())) {
+            throw new DuplicatePanException("PAN number already exists.");
+        }
+
+
 
         Investor investor = Investor.builder()
                 .id(user.getId()) // Map userId
@@ -282,6 +301,87 @@ public class InvestorServiceImpl implements InvestorService {
         return investorRepository.save(investor);
     }
 
+
+    @Override
+    public InvestorSummaryResponse getInvestmentSummary(String investorId) {
+        Investor investor = investorRepository.findById(investorId)
+                .orElseThrow(() -> new RuntimeException("Investor not found"));
+
+        // Total invested = sum of all BUY transactions
+        BigDecimal totalInvested = transactionRepository.findByInvestorId(investorId).stream()
+                .filter(txn -> txn.getTxnType() == TransactionType.BUY)
+                .map(Transaction::getAmount)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+        // Current value = sum of (unitsHeld * latest NAV) for all holdings
+        BigDecimal currentValue = unitLedgerRepository.findByInvestorId(investorId).stream()
+                .map(ledger -> {
+                    BigDecimal latestNav = ledger.getFundScheme().getCurrentNav();
+                    return ledger.getUnitsHeld().multiply(latestNav);
+                })
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+        // Returns = currentValue - totalInvested
+        BigDecimal returns = currentValue.subtract(totalInvested);
+
+        return new InvestorSummaryResponse(
+                totalInvested,
+                currentValue,
+                returns,
+                investor.getWalletBalance()
+        );
+    }
+
+    @Override
+    public List<FundInvestmentSummaryDto> getFundWiseSummary(String investorId) {
+        List<UnitLedger> ledgers = unitLedgerRepository.findByInvestorId(investorId);
+
+        // Total amount investor has invested across all schemes
+        BigDecimal totalInvested = ledgers.stream()
+                .map(ledger -> ledger.getUnitsHeld().multiply(ledger.getAvgNav()))
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+        return ledgers.stream().map(ledger -> {
+            FundScheme scheme = ledger.getFundScheme();
+            BigDecimal unitsHeld = ledger.getUnitsHeld();
+            BigDecimal avgNav = ledger.getAvgNav();
+            BigDecimal investedAmount = unitsHeld.multiply(avgNav);
+            BigDecimal currentNav = scheme.getCurrentNav();
+            BigDecimal currentValue = unitsHeld.multiply(currentNav);
+            BigDecimal profitOrLoss = currentValue.subtract(investedAmount);
+
+            double allocationPercent = totalInvested.compareTo(BigDecimal.ZERO) > 0
+                    ? investedAmount.divide(totalInvested, 4, RoundingMode.HALF_UP)
+                    .multiply(BigDecimal.valueOf(100))
+                    .doubleValue()
+                    : 0.0;
+
+            return new FundInvestmentSummaryDto(
+                    scheme.getName(),
+                    avgNav,
+                    investedAmount,
+                    currentNav,
+                    allocationPercent,
+                    profitOrLoss,
+                    scheme.getId()
+            );
+        }).collect(Collectors.toList());
+    }
+
+
+    @Override
+    public List<FundSchemeListDto> getAllAvailableSchemes() {
+        List<FundScheme> schemes = fundSchemeRepository.findAll();
+
+        return schemes.stream().map(s -> new FundSchemeListDto(
+                s.getId(),
+                s.getName(),
+                s.getCurrentNav(),
+                s.getCategory(),
+                s.getRiskLevel().name(),
+                s.getAum()
+        )).collect(Collectors.toList());
+    }
 
 
 

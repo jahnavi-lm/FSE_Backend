@@ -17,6 +17,9 @@ public class Investor {
 
     @Id
     private String id; // FK from User
+    @Version
+    @Column(name = "version")
+    private Long version;
 
     @OneToOne(fetch = FetchType.LAZY)
     @MapsId

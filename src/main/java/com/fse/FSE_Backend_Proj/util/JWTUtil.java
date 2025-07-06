@@ -11,7 +11,7 @@ import java.util.Date;
 @Component
 public class JWTUtil {
 
-    @Value("${jwt.secret:mySecretKey12345678901234567890123456789012}") // Must be 32+ chars
+    @Value("${jwt.secret:mySecretKey12345678901234567890123456789012}") // Must be 32+ characters
     private String secret;
 
     @Value("${jwt.expiration:86400000}") // 1 day in milliseconds
@@ -21,15 +21,18 @@ public class JWTUtil {
         return Keys.hmacShaKeyFor(secret.getBytes());
     }
 
-    public String generateToken(String username) {
+    // ✅ Combines email and role into subject
+    public String generateToken(String email, String role) {
+        String subject = email + ":" + role;  // Combined format
         return Jwts.builder()
-                .setSubject(username)
+                .setSubject(subject)
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + expirationTime))
                 .signWith(getSigningKey(), SignatureAlgorithm.HS256)
                 .compact();
     }
 
+    // ✅ Extracts "email:ROLE" (full subject)
     public String extractUsername(String token) {
         return Jwts.parserBuilder()
                 .setSigningKey(getSigningKey())
@@ -37,6 +40,18 @@ public class JWTUtil {
                 .parseClaimsJws(token)
                 .getBody()
                 .getSubject();
+    }
+
+    // ✅ Optionally extract email from subject
+    public String extractEmail(String token) {
+        String subject = extractUsername(token);
+        return subject.split(":")[0]; // before ":"
+    }
+
+    // ✅ Optionally extract role from subject
+    public String extractRole(String token) {
+        String subject = extractUsername(token);
+        return subject.split(":")[1]; // after ":"
     }
 
     public boolean isTokenValid(String token) {
