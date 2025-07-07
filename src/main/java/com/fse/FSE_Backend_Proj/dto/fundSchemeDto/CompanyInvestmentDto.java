@@ -12,6 +12,7 @@ import java.time.LocalDate;
 @Builder
 public class CompanyInvestmentDto {
     private String id;
+    private String companyId;
     private String companyName;
     private BigDecimal investedAmount;
     private Integer numberOfStocks;
