@@ -3,6 +3,7 @@ package com.fse.FSE_Backend_Proj.controller;
 import com.fse.FSE_Backend_Proj.dto.fundManagerDto.FundManagerRequestDto;
 import com.fse.FSE_Backend_Proj.dto.fundManagerDto.FundManagerResponseDto;
 import com.fse.FSE_Backend_Proj.dto.fundSchemeDto.FundSchemeResponseDto;
+import com.fse.FSE_Backend_Proj.model.FundScheme;
 import com.fse.FSE_Backend_Proj.service.FundManagerService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -47,9 +48,16 @@ public class FundManagerController {
         return ResponseEntity.noContent().build();
     }
 
-    @GetMapping("/{id}/schemes")
+    @GetMapping("/schemes/{id}")
     public ResponseEntity<List<FundSchemeResponseDto>> getSchemesByFundManager(@PathVariable String id) {
         return ResponseEntity.ok(fundManagerService.getSchemesByFundManagerId(id));
+    }
+
+    @PutMapping("/scheme/{id}")
+    public ResponseEntity<FundSchemeResponseDto> updateSchemeById(
+            @PathVariable String id,
+            @Valid @RequestBody FundSchemeResponseDto dto) {
+        return ResponseEntity.ok(fundManagerService.UpdateSchemeById(id, dto));
     }
 
 }

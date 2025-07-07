@@ -2,6 +2,7 @@ package com.fse.FSE_Backend_Proj.service;
 
 import com.fse.FSE_Backend_Proj.dto.fundManagerDto.FundManagerRequestDto;
 import com.fse.FSE_Backend_Proj.dto.fundManagerDto.FundManagerResponseDto;
+import com.fse.FSE_Backend_Proj.dto.fundSchemeDto.CompanyInvestmentDto;
 import com.fse.FSE_Backend_Proj.dto.fundSchemeDto.FundSchemeResponseDto;
 
 import java.util.List;
@@ -13,4 +14,6 @@ public interface FundManagerService {
     FundManagerResponseDto update(String id, FundManagerRequestDto dto);
     void delete(String id);
     List<FundSchemeResponseDto> getSchemesByFundManagerId(String id);
+    FundSchemeResponseDto UpdateSchemeById (String id,FundSchemeResponseDto dto);
+//    CompanyInvestmentDto buyStocks(String id,CompanyInvestmentDto dto);
 }

@@ -1,6 +1,7 @@
 package com.fse.FSE_Backend_Proj.dto.fundSchemeDto;
 
 import com.fse.FSE_Backend_Proj.dto.fundSchemeDto.CompanyInvestmentDto;
+import com.fse.FSE_Backend_Proj.model.CompanyInvestment;
 import com.fse.FSE_Backend_Proj.model.enums.FundSchemeStatus;
 import com.fse.FSE_Backend_Proj.model.enums.FundSchemeType;
 import com.fse.FSE_Backend_Proj.model.enums.RiskLevel;
@@ -49,7 +50,7 @@ public class FundSchemeRequestDto {
     @NotNull
     private FundSchemeStatus status;
 
-    private List<CompanyInvestmentDto> companiesInvestedIn;
+    private List<CompanyInvestment> companiesInvestedIn;
     private List<String> investorIds;
 
 }
