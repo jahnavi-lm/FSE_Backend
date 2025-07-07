@@ -44,6 +44,8 @@ public class SecurityConfig {
                         .requestMatchers("/api/auth/**").permitAll()  // Public: login, register, forgot password
                         .requestMatchers("/api/public/**").permitAll() // Optional public endpoints
                         .requestMatchers("/api/investors/**").permitAll()
+                        .requestMatchers("/api/fundManagers/**").permitAll()
+                        .requestMatchers("/api/amcs/**").permitAll()
                         .requestMatchers("/error").permitAll() //for custom response issue //pan card one
                         .anyRequest().authenticated()                 // All others need auth
                 )

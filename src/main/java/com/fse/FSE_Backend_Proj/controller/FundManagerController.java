@@ -4,6 +4,7 @@ import com.fse.FSE_Backend_Proj.dto.fundManagerDto.FundManagerRequestDto;
 import com.fse.FSE_Backend_Proj.dto.fundManagerDto.FundManagerResponseDto;
 import com.fse.FSE_Backend_Proj.dto.fundSchemeDto.FundSchemeResponseDto;
 import com.fse.FSE_Backend_Proj.model.FundScheme;
+import com.fse.FSE_Backend_Proj.repository.FundManagerRepository;
 import com.fse.FSE_Backend_Proj.service.FundManagerService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -11,6 +12,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/fundManagers")
@@ -18,6 +20,7 @@ import java.util.List;
 public class FundManagerController {
 
     private final FundManagerService fundManagerService;
+    private final FundManagerRepository fundManagerRepository;
 
     @PostMapping("/create")
     public ResponseEntity<FundManagerResponseDto> create(
@@ -29,6 +32,13 @@ public class FundManagerController {
     @GetMapping("/{id}")
     public ResponseEntity<FundManagerResponseDto> getById(@PathVariable String id) {
         return ResponseEntity.ok(fundManagerService.getById(id));
+    }
+
+    @GetMapping("/exists/{id}")
+    public ResponseEntity<Boolean> checkFundManagerExists(@PathVariable UUID id){
+        boolean exists = fundManagerRepository.existsById(String.valueOf(id));
+        return ResponseEntity.ok(exists);
+
     }
 
     @GetMapping
