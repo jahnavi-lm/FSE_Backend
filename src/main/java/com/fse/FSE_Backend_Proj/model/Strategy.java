@@ -1,16 +1,9 @@
 package com.fse.FSE_Backend_Proj.model;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-
-import java.time.LocalDateTime;
+import lombok.*;
 
 @Entity
-@Table(name = "strategies")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -18,28 +11,19 @@ import java.time.LocalDateTime;
 public class Strategy {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    private String id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
-    @NotBlank(message = "Strategy name is required")
-    @Size(max = 150, message = "Name cannot exceed 150 characters")
-    @Column(nullable = false, unique = true)
     private String name;
+    private String type;
+    private Double capitalAllocation;
 
-    @Size(max = 2000)
-    @Column(columnDefinition = "TEXT")
-    private String description;
+    private String status;  // not started, running, stopped, completed
 
-    @NotNull(message = "Strategy parameters must be provided")
-    @Lob
-    @Column(name = "parameters", nullable = false, columnDefinition = "JSONB")
-    private String parameters; // store JSON config like { "rsi_period": 14 }
+    @Column(length = 2000)
+    private String parametersJson;  // Store dynamic form values as JSON
 
-    @Column(name = "created_at", nullable = false, updatable = false)
-    private LocalDateTime createdAt;
+    @Column(length = 2000)
+    private String resultJson;      // Simulation result
 
-    @PrePersist
-    public void onCreate() {
-        this.createdAt = LocalDateTime.now();
-    }
 }
