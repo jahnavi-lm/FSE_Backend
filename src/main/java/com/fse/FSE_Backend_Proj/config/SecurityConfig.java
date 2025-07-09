@@ -46,6 +46,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/investors/**").permitAll()
                         .requestMatchers("/api/fundManagers/**").permitAll()
                         .requestMatchers("/api/amcs/**").permitAll()
+                        .requestMatchers("/api/fund-schemes/**").permitAll()
                         .requestMatchers("/error").permitAll() //for custom response issue //pan card one
                         .anyRequest().authenticated()                 // All others need auth
                 )
