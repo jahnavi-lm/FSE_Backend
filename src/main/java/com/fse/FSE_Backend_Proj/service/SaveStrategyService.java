@@ -1,8 +1,8 @@
 package com.fse.FSE_Backend_Proj.service;
 
-import com.fse.FSE_Backend_Proj.dto.strategyDto.StrategyDTO;
-import com.fse.FSE_Backend_Proj.model.SaveStrategy;
-import com.fse.FSE_Backend_Proj.repository.SaveStrategyRepository;
+import com.fse.FSE_Backend_Proj.dto.StrategyRequest;
+import com.fse.FSE_Backend_Proj.model.Strategy;
+import com.fse.FSE_Backend_Proj.repository.StrategyRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -13,70 +13,87 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class SaveStrategyService {
 
-    private final SaveStrategyRepository saveStrategyRepository;
+    private final StrategyRepository strategyRepository;
 
-    public StrategyDTO saveStrategy(StrategyDTO dto) {
-        SaveStrategy saveStrategy = SaveStrategy.builder()
-                .id(dto.getId())
-                .name(dto.getName())
-                .type(dto.getType())
-                .capitalAllocation(dto.getCapitalAllocation())
+    // Create or update
+    public StrategyRequest saveStrategy(StrategyRequest dto) {
+        Strategy strategy = Strategy.builder()
+                .id(dto.getId()) // needed for update operations
+                .name(dto.getStrategyName())
+                .script(dto.getStrategyScript())
+                .symbolList(dto.getSymbolList())
+                .startDate(dto.getStartDate())
+                .endDate(dto.getEndDate())
+                .initialCapital(dto.getInitialCapital())
+                .symbol(dto.getSymbol())
                 .status(dto.getStatus() != null ? dto.getStatus() : "not started")
-                .parametersJson(dto.getParametersJson())
                 .resultJson(dto.getResultJson())
                 .build();
 
-        SaveStrategy saved = saveStrategyRepository.save(saveStrategy);
+        Strategy saved = strategyRepository.save(strategy);
         return mapToDTO(saved);
     }
 
-    public List<StrategyDTO> getAllStrategies() {
-        return saveStrategyRepository.findAll().stream()
+    // Get all
+    public List<StrategyRequest> getAllStrategies() {
+        return strategyRepository.findAll().stream()
                 .map(this::mapToDTO)
                 .collect(Collectors.toList());
     }
 
-    public StrategyDTO getStrategyById(Long id) {
-        SaveStrategy saveStrategy = saveStrategyRepository.findById(id)
+    // Get by id
+    public StrategyRequest getStrategyById(Long id) {
+        Strategy strategy = strategyRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Strategy not found"));
-        return mapToDTO(saveStrategy);
+        return mapToDTO(strategy);
     }
 
+    // Delete
     public void deleteStrategy(Long id) {
-        saveStrategyRepository.deleteById(id);
+        strategyRepository.deleteById(id);
     }
 
-    public StrategyDTO startSimulation(Long id) {
-        SaveStrategy saveStrategy = saveStrategyRepository.findById(id)
+    // Start simulation
+    public StrategyRequest startSimulation(Long id) {
+        Strategy strategy = getStrategy(id);
+        strategy.setStatus("running");
+        return mapToDTO(strategyRepository.save(strategy));
+    }
+
+    // Stop simulation
+    public StrategyRequest stopSimulation(Long id) {
+        Strategy strategy = getStrategy(id);
+        strategy.setStatus("stopped");
+        return mapToDTO(strategyRepository.save(strategy));
+    }
+
+    // Complete simulation
+    public StrategyRequest completeSimulation(Long id, String resultJson) {
+        Strategy strategy = getStrategy(id);
+        strategy.setStatus("completed");
+        strategy.setResultJson(resultJson);
+        return mapToDTO(strategyRepository.save(strategy));
+    }
+
+    // Helper to fetch Strategy or throw
+    private Strategy getStrategy(Long id) {
+        return strategyRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Strategy not found"));
-        saveStrategy.setStatus("running");
-        return mapToDTO(saveStrategyRepository.save(saveStrategy));
     }
 
-    public StrategyDTO stopSimulation(Long id) {
-        SaveStrategy saveStrategy = saveStrategyRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Strategy not found"));
-        saveStrategy.setStatus("stopped");
-        return mapToDTO(saveStrategyRepository.save(saveStrategy));
-    }
-
-    public StrategyDTO completeSimulation(Long id, String resultJson) {
-        SaveStrategy saveStrategy = saveStrategyRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Strategy not found"));
-        saveStrategy.setStatus("completed");
-        saveStrategy.setResultJson(resultJson);
-        return mapToDTO(saveStrategyRepository.save(saveStrategy));
-    }
-
-    private StrategyDTO mapToDTO(SaveStrategy saveStrategy) {
-        return StrategyDTO.builder()
-                .id(saveStrategy.getId())
-                .name(saveStrategy.getName())
-                .type(saveStrategy.getType())
-                .capitalAllocation(saveStrategy.getCapitalAllocation())
-                .status(saveStrategy.getStatus())
-                .parametersJson(saveStrategy.getParametersJson())
-                .resultJson(saveStrategy.getResultJson())
+    // Map entity -> DTO
+    private StrategyRequest mapToDTO(Strategy strategy) {
+        return StrategyRequest.builder()
+                .id(strategy.getId()) // Add this
+                .strategyName(strategy.getName())
+                .strategyScript(strategy.getScript())
+                .symbolList(strategy.getSymbolList())
+                .startDate(strategy.getStartDate())
+                .endDate(strategy.getEndDate())
+                .initialCapital(strategy.getInitialCapital())
+                .symbol(strategy.getSymbol())
+                .status(strategy.getStatus())
+                .resultJson(strategy.getResultJson())
                 .build();
     }
 }

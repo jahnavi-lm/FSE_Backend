@@ -124,6 +124,8 @@ public class SecurityConfig {
                         .requestMatchers("/api/import").permitAll()
                         .requestMatchers("/api/backtest").permitAll()
                         .requestMatchers("/api/backtest/candles").permitAll()
+                        .requestMatchers("/api/strategies/**").permitAll()
+                        .requestMatchers("/api/save-strategies/**").permitAll()
                         .requestMatchers("/error").permitAll()
                         .anyRequest().authenticated()
                 )

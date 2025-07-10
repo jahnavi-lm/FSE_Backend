@@ -1,10 +1,7 @@
 package com.fse.FSE_Backend_Proj.model;
 
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -30,6 +27,12 @@ public class Strategy {
     private String paramsJson;
     private String symbol;// JSON string for predefined param (optional)
 
+    private Double initialCapital;
+
     private LocalDate startDate;
     private LocalDate endDate;
+
+    private String status;                // not started, running, stopped, completed
+    @Column(length = 20000)
+    private String resultJson;            // Simulation result
 }
