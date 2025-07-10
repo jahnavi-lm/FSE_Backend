@@ -20,6 +20,8 @@ public interface InvestorService {
 
     List<NavHistoryDto> getNavHistory(String schemeId);
 
+    List<TransactionDto> getTransactionsByScheme(String investorId, String schemeId);
+
     List<SchemeDto> getAllSchemes();
 
     InvestorProfileResponse getInvestorProfile(String investorId);
