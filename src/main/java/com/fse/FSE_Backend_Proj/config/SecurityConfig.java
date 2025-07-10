@@ -124,6 +124,8 @@ public class SecurityConfig {
                         .requestMatchers("/api/import").permitAll()
                         .requestMatchers("/api/backtest").permitAll()
                         .requestMatchers("/api/backtest/candles").permitAll()
+                        .requestMatchers("/api/strategies/**").permitAll()
+                        .requestMatchers("/api/save-strategies/**").permitAll()
                         .requestMatchers("/error").permitAll()
                         .anyRequest().authenticated()
                 )
@@ -135,7 +137,7 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
-        config.setAllowedOrigins(List.of("http://localhost:5173")); // Adjust if needed
+        config.setAllowedOrigins(List.of("http://localhost:5174")); // Adjust if needed
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         config.setAllowedHeaders(List.of("*"));
         config.setAllowCredentials(true);
