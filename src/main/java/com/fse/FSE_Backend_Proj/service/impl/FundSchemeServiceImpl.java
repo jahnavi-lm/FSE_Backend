@@ -69,9 +69,56 @@ public class FundSchemeServiceImpl implements FundSchemeService {
         return fundSchemeRepo.findByAmc_Id(amcId).stream().map(this::toDto).collect(Collectors.toList());
     }
 
+//    @Override
+//    public FundSchemeResponseDto update(String id, FundSchemeRequestDto dto) {
+//        FundScheme fs = getEntity(id);
+//        fs.setName(dto.getName());
+//        fs.setType(dto.getType());
+//        fs.setObjective(dto.getObjective());
+//        fs.setAum(dto.getAum());
+//        fs.setCurrentNav(dto.getCurrentNav());
+//        fs.setRiskLevel(dto.getRiskLevel());
+//        fs.setExpenseRatio(dto.getExpenseRatio());
+//        fs.setExitLoad(dto.getExitLoad());
+//        fs.setLockInPeriod(dto.getLockInPeriod());
+//        fs.setMinInvestment(dto.getMinInvestment());
+//        fs.setMinSipAmount(dto.getMinSipAmount());
+//        fs.setBenchmarkIndex(dto.getBenchmarkIndex());
+//        fs.setLaunchDate(dto.getLaunchDate());
+//        fs.setCategory(dto.getCategory());
+//        fs.setStatus(dto.getStatus());
+//
+//        List<CompanyInvestment> investments = dto.getCompaniesInvestedIn().stream()
+//                .map(c -> CompanyInvestment.builder()
+//                        .companyName(c.getCompanyName())
+//                        .investedAmount(c.getInvestedAmount())
+//                        .numberOfStocks(c.getNumberOfStocks())
+//                        .investmentDate(c.getInvestmentDate())
+//                        .fundScheme(fs)
+//                        .build())
+//                .toList();
+//        fs.setCompaniesInvestedIn(investments);
+//
+//        if (dto.getInvestorIds() != null) {
+//            List<Investor> investors = dto.getInvestorIds().stream()
+//                    .map(idVal -> investorRepo.findById(idVal)
+//                            .orElseThrow(() -> new ResourceNotFoundException("Investor not found with ID: " + idVal)))
+//                    .toList();
+//
+//            investors.forEach(inv -> inv.setFundScheme(fs));
+//            fs.setInvestors(investors);
+//        } else {
+//            fs.setInvestors(new ArrayList<>());
+//        }
+//
+//        return toDto(fundSchemeRepo.save(fs));
+//    }
+
+
     @Override
     public FundSchemeResponseDto update(String id, FundSchemeRequestDto dto) {
         FundScheme fs = getEntity(id);
+
         fs.setName(dto.getName());
         fs.setType(dto.getType());
         fs.setObjective(dto.getObjective());
@@ -88,7 +135,8 @@ public class FundSchemeServiceImpl implements FundSchemeService {
         fs.setCategory(dto.getCategory());
         fs.setStatus(dto.getStatus());
 
-        List<CompanyInvestment> investments = dto.getCompaniesInvestedIn().stream()
+        List<CompanyInvestment> investments = dto.getCompaniesInvestedIn() != null
+                ? dto.getCompaniesInvestedIn().stream()
                 .map(c -> CompanyInvestment.builder()
                         .companyName(c.getCompanyName())
                         .investedAmount(c.getInvestedAmount())
@@ -96,23 +144,42 @@ public class FundSchemeServiceImpl implements FundSchemeService {
                         .investmentDate(c.getInvestmentDate())
                         .fundScheme(fs)
                         .build())
-                .toList();
-        fs.setCompaniesInvestedIn(investments);
+                .collect(Collectors.toCollection(ArrayList::new))
+                : new ArrayList<>();
+
+        // FIX: Clear the old list and add new
+        if (fs.getCompaniesInvestedIn() != null) {
+            fs.getCompaniesInvestedIn().clear();
+            fs.getCompaniesInvestedIn().addAll(investments);
+        } else {
+            fs.setCompaniesInvestedIn(investments);
+        }
 
         if (dto.getInvestorIds() != null) {
             List<Investor> investors = dto.getInvestorIds().stream()
                     .map(idVal -> investorRepo.findById(idVal)
                             .orElseThrow(() -> new ResourceNotFoundException("Investor not found with ID: " + idVal)))
-                    .toList();
+                    .collect(Collectors.toList());
 
             investors.forEach(inv -> inv.setFundScheme(fs));
-            fs.setInvestors(investors);
+
+            if (fs.getInvestors() != null) {
+                fs.getInvestors().clear();
+                fs.getInvestors().addAll(investors);
+            } else {
+                fs.setInvestors(investors);
+            }
         } else {
-            fs.setInvestors(new ArrayList<>());
+            if (fs.getInvestors() != null) {
+                fs.getInvestors().clear();  // clear if exists
+            } else {
+                fs.setInvestors(new ArrayList<>());
+            }
         }
 
         return toDto(fundSchemeRepo.save(fs));
     }
+
 
     @Override
     public void delete(String id) {
