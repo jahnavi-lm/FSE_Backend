@@ -1,6 +1,5 @@
 package com.fse.FSE_Backend_Proj.model;
 
-
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -11,25 +10,24 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
-import java.util.List;
 
 @Entity
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Strategy {
+public class Candle {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String name;              // e.g. "RSI-Based Strategy"
-    private List<String> symbolList;            // Stock symbol like "TCS"
-    private String script;            // For user-defined DSL
-    private String paramsJson;
-    private String symbol;// JSON string for predefined param (optional)
+    private LocalDate date;
+    private String symbol;
 
-    private LocalDate startDate;
-    private LocalDate endDate;
+    private double open;
+    private double high;
+    private double low;
+    private double close;
+    private long volume;
 }

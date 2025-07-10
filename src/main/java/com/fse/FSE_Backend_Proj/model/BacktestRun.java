@@ -37,7 +37,7 @@ public class BacktestRun {
     @NotNull(message = "Strategy is required")
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "strategy_id", nullable = false)
-    private Strategy strategy;
+    private SaveStrategy saveStrategy;
 
     @NotNull(message = "Start date is required")
     @PastOrPresent
