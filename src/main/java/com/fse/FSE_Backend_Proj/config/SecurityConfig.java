@@ -1,7 +1,78 @@
+//package com.fse.FSE_Backend_Proj.config;
+//
+//import com.fse.FSE_Backend_Proj.util.JWTAuthFilter;
+//import lombok.RequiredArgsConstructor;
+//import org.springframework.context.annotation.Bean;
+//import org.springframework.context.annotation.Configuration;
+//import org.springframework.security.authentication.AuthenticationManager;
+//import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
+//import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
+//import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+//import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+//import org.springframework.security.crypto.password.PasswordEncoder;
+//import org.springframework.security.web.SecurityFilterChain;
+//import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+//import org.springframework.web.cors.CorsConfiguration;
+//import org.springframework.web.cors.CorsConfigurationSource;
+//import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+//
+//import java.util.List;
+//
+//@Configuration
+//@RequiredArgsConstructor
+//@EnableMethodSecurity
+//public class SecurityConfig {
+//
+//    private final JWTAuthFilter jwtAuthFilter;
+//
+//    @Bean
+//    public PasswordEncoder passwordEncoder() {
+//        return new BCryptPasswordEncoder();
+//    }
+//
+//    @Bean
+//    public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
+//        return config.getAuthenticationManager();
+//    }
+//
+//    @Bean
+//    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+//        http
+//                .csrf(csrf -> csrf.disable())
+//                .cors(cors -> {}) // Enables custom CORS settings
+//                .authorizeHttpRequests(auth -> auth
+//                        .requestMatchers("/api/auth/**").permitAll()  // Public: login, register, forgot password
+//                        .requestMatchers("/api/public/**").permitAll() // Optional public endpoints
+//                        .requestMatchers("/api/investors/**").permitAll()
+//                        .requestMatchers("/api/fundManagers/**").permitAll()
+//                        .requestMatchers("/api/amcs/**").permitAll()
+//                        .requestMatchers("/api/fund-schemes/**").permitAll()
+//                        .requestMatchers("/error").permitAll() //for custom response issue //pan card one
+//                        .anyRequest().authenticated()                 // All others need auth
+//                )
+//                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
+//
+//        return http.build();
+//    }
+//
+//    @Bean
+//    public CorsConfigurationSource corsConfigurationSource() {
+//        CorsConfiguration config = new CorsConfiguration();
+//        config.setAllowedOrigins(List.of("http://localhost:5173")); // Your frontend origin
+//        config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+//        config.setAllowedHeaders(List.of("*"));
+//        config.setAllowCredentials(true); // Important if using cookies or Authorization headers
+//
+//        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+//        source.registerCorsConfiguration("/**", config); // Apply to all endpoints
+//        return source;
+//    }
+//}
+
+
 package com.fse.FSE_Backend_Proj.config;
 
 import com.fse.FSE_Backend_Proj.util.JWTAuthFilter;
-import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -11,9 +82,7 @@ import org.springframework.security.config.annotation.method.configuration.Enabl
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
@@ -42,20 +111,23 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .csrf(csrf -> csrf.disable())
-                .cors(cors -> {}) // Enables custom CORS settings
+                .cors(cors -> cors.configurationSource(corsConfigurationSource())) // 👈 Explicitly set the source
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/auth/**").permitAll()  // Public: login, register, forgot password
-                        .requestMatchers("/api/public/**").permitAll() // Optional public endpoints
+                        .requestMatchers("/api/auth/**").permitAll()
+                        .requestMatchers("/api/public/**").permitAll()
                         .requestMatchers("/api/investors/**").permitAll()
                         .requestMatchers("/api/fundManagers/**").permitAll()
                         .requestMatchers("/api/amcs/**").permitAll()
-                        .requestMatchers("/error").permitAll() //for custom response issue //pan card one
-                        .requestMatchers("/api/strategies/**").permitAll()// ✅ Check this!
-                                .anyRequest().authenticated()                 // All others need auth
-                )
-                .exceptionHandling(ex -> ex
-                        .authenticationEntryPoint(authenticationEntryPoint()) // 👈 ADD THIS
-                        .accessDeniedHandler(accessDeniedHandler())            // 👈 Optional
+                        .requestMatchers("/api/fund-schemes/**").permitAll()
+                        .requestMatchers("/api/import/companies").permitAll()
+                        .requestMatchers("/api/import/**").permitAll()
+                        .requestMatchers("/api/import").permitAll()
+                        .requestMatchers("/api/backtest").permitAll()
+                        .requestMatchers("/api/backtest/candles").permitAll()
+                        .requestMatchers("/api/strategies/**").permitAll()
+                        .requestMatchers("/api/save-strategies/**").permitAll()
+                        .requestMatchers("/error").permitAll()
+                        .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
 
@@ -65,30 +137,13 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
-        config.setAllowedOrigins(List.of("http://localhost:5173")); // Your frontend origin
+        config.setAllowedOrigins(List.of("http://localhost:5173")); // Adjust if needed
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         config.setAllowedHeaders(List.of("*"));
-        config.setAllowCredentials(true); // Important if using cookies or Authorization headers
+        config.setAllowCredentials(true);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**", config); // Apply to all endpoints
+        source.registerCorsConfiguration("/**", config);
         return source;
-    }
-    @Bean
-    public AuthenticationEntryPoint authenticationEntryPoint() {
-        return (request, response, authException) -> {
-            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED); // 401
-            response.setContentType("application/json");
-            response.getWriter().write("{\"error\": \"Unauthorized - invalid or missing credentials\"}");
-        };
-    }
-
-    @Bean
-    public AccessDeniedHandler accessDeniedHandler() {
-        return (request, response, accessDeniedException) -> {
-            response.setStatus(HttpServletResponse.SC_FORBIDDEN); // 403
-            response.setContentType("application/json");
-            response.getWriter().write("{\"error\": \"Forbidden - access denied\"}");
-        };
     }
 }

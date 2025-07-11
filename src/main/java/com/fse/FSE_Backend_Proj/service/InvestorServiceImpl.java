@@ -37,21 +37,24 @@ public class InvestorServiceImpl implements InvestorService {
                 UUID.fromString(request.getSchemeId()).toString()
         ).orElseThrow(() -> new RuntimeException("Scheme not found"));
 
+        // ✅ Get NAV and validate it
         BigDecimal nav = scheme.getCurrentNav();
         if (nav == null || nav.compareTo(BigDecimal.ZERO) <= 0) {
             throw new RuntimeException("Invalid or missing NAV");
         }
 
+        // ✅ Wallet balance validation
+        BigDecimal walletBalance = BigDecimal.valueOf(investor.getWalletBalance());
         BigDecimal amount = request.getAmount();
 
-        // ✅ Check wallet balance
-        BigDecimal currentBalance = BigDecimal.valueOf(investor.getWalletBalance());
-        if (currentBalance.compareTo(amount) < 0) {
+        if (walletBalance.compareTo(amount) < 0) {
             throw new RuntimeException("Insufficient wallet balance");
         }
 
+        // ✅ Calculate units
         BigDecimal units = amount.divide(nav, 4, RoundingMode.HALF_UP);
 
+        // ✅ Create and save transaction
         Transaction txn = Transaction.builder()
                 .investor(investor)
                 .fundScheme(scheme)
@@ -60,9 +63,9 @@ public class InvestorServiceImpl implements InvestorService {
                 .units(units)
                 .navAtTxn(nav)
                 .build();
-
         transactionRepository.save(txn);
 
+        // ✅ Update unit ledger
         UnitLedger ledger = unitLedgerRepository.findByInvestorIdAndFundSchemeId(investor.getId(), scheme.getId())
                 .orElse(UnitLedger.builder()
                         .investor(investor)
@@ -77,17 +80,17 @@ public class InvestorServiceImpl implements InvestorService {
         ledger.setLastUpdated(LocalDateTime.now());
         unitLedgerRepository.save(ledger);
 
+        // ✅ Update AUM
         scheme.setAum(scheme.getAum().add(amount));
         fundSchemeRepository.save(scheme);
 
         // ✅ Deduct wallet balance
-        BigDecimal updatedBalance = currentBalance.subtract(amount);
+        BigDecimal updatedBalance = walletBalance.subtract(amount);
         investor.setWalletBalance(updatedBalance.doubleValue());
         investorRepository.save(investor);
 
         return new InvestmentResponse("Investment successful", units.doubleValue(), nav.doubleValue(), txn.getTxnDate());
     }
-
 
 
     @Override
@@ -160,7 +163,6 @@ public class InvestorServiceImpl implements InvestorService {
 
 
 
-
     @Override
     public InvestorPortfolioResponse getPortfolio(String investorId) {
         Investor investor = investorRepository.findById(investorId)
@@ -195,12 +197,31 @@ public class InvestorServiceImpl implements InvestorService {
                         txn.getId(),
                         txn.getTxnType(),
                         txn.getFundScheme().getId(),
+                        txn.getFundScheme() != null ? txn.getFundScheme().getName() : null, // scheme name
                         txn.getNavAtTxn(),
                         txn.getUnits(),
                         txn.getAmount(),
                         txn.getTxnDate()
-                )).collect(Collectors.toList());
+                ))
+                .collect(Collectors.toList());
     }
+
+    public List<TransactionDto> getTransactionsByScheme(String investorId, String schemeId) {
+        return transactionRepository.findByInvestorIdAndFundSchemeId(investorId, schemeId).stream()
+                .map(txn -> new TransactionDto(
+                        txn.getId(),
+                        txn.getTxnType(),
+                        txn.getFundScheme().getId(),
+                        txn.getFundScheme().getName(),
+                        txn.getNavAtTxn(),
+                        txn.getUnits(),
+                        txn.getAmount(),
+                        txn.getTxnDate()
+                ))
+                .collect(Collectors.toList());
+    }
+
+
 
     @Override
     public List<NavHistoryDto> getNavHistory(String schemeId) {
@@ -323,10 +344,17 @@ public class InvestorServiceImpl implements InvestorService {
                 .orElseThrow(() -> new RuntimeException("Investor not found"));
 
         // Total invested = sum of all BUY transactions
-        BigDecimal totalInvested = transactionRepository.findByInvestorId(investorId).stream()
+        BigDecimal totalBuy = transactionRepository.findByInvestorId(investorId).stream()
                 .filter(txn -> txn.getTxnType() == TransactionType.BUY)
                 .map(Transaction::getAmount)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+        BigDecimal totalSell = transactionRepository.findByInvestorId(investorId).stream()
+                .filter(txn -> txn.getTxnType() == TransactionType.REDEEM)
+                .map(Transaction::getAmount)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+        BigDecimal totalInvested = totalBuy.subtract(totalSell);
 
         // Current value = sum of (unitsHeld * latest NAV) for all holdings
         BigDecimal currentValue = unitLedgerRepository.findByInvestorId(investorId).stream()

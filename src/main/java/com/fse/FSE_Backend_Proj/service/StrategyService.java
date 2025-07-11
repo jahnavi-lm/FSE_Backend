@@ -79,6 +79,4 @@ public class StrategyService {
                 .resultJson(strategy.getResultJson())
                 .build();
     }
-
-
 }
