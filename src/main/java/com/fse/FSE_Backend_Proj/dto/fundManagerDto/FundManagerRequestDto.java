@@ -1,13 +1,14 @@
 package com.fse.FSE_Backend_Proj.dto.fundManagerDto;
 
 import jakarta.validation.constraints.*;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 import java.util.List;
 
-@Getter
-@Setter
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
+@Builder
 public class FundManagerRequestDto {
 
     @NotBlank(message = "Employee code is required")

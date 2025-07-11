@@ -1,6 +1,7 @@
 package com.fse.FSE_Backend_Proj.config;
 
 import com.fse.FSE_Backend_Proj.util.JWTAuthFilter;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -10,7 +11,9 @@ import org.springframework.security.config.annotation.method.configuration.Enabl
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
@@ -47,7 +50,12 @@ public class SecurityConfig {
                         .requestMatchers("/api/fundManagers/**").permitAll()
                         .requestMatchers("/api/amcs/**").permitAll()
                         .requestMatchers("/error").permitAll() //for custom response issue //pan card one
-                        .anyRequest().authenticated()                 // All others need auth
+                        .requestMatchers("/api/strategies/**").permitAll()// ✅ Check this!
+                                .anyRequest().authenticated()                 // All others need auth
+                )
+                .exceptionHandling(ex -> ex
+                        .authenticationEntryPoint(authenticationEntryPoint()) // 👈 ADD THIS
+                        .accessDeniedHandler(accessDeniedHandler())            // 👈 Optional
                 )
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
 
@@ -65,5 +73,22 @@ public class SecurityConfig {
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", config); // Apply to all endpoints
         return source;
+    }
+    @Bean
+    public AuthenticationEntryPoint authenticationEntryPoint() {
+        return (request, response, authException) -> {
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED); // 401
+            response.setContentType("application/json");
+            response.getWriter().write("{\"error\": \"Unauthorized - invalid or missing credentials\"}");
+        };
+    }
+
+    @Bean
+    public AccessDeniedHandler accessDeniedHandler() {
+        return (request, response, accessDeniedException) -> {
+            response.setStatus(HttpServletResponse.SC_FORBIDDEN); // 403
+            response.setContentType("application/json");
+            response.getWriter().write("{\"error\": \"Forbidden - access denied\"}");
+        };
     }
 }
