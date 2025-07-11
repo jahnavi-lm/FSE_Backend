@@ -1,11 +1,12 @@
 package com.fse.FSE_Backend_Proj.dto.amcDto;
 
 import jakarta.validation.constraints.*;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
-@Getter
-@Setter
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
+@Builder
 public class AmcRequestDto {
 
     @NotBlank(message = "AMC name is required")

@@ -19,6 +19,7 @@ public class UserService {
     private final AMCRepository amcRepository;
     private final PasswordEncoder passwordEncoder;
 
+
     public User registerUser(String name, String email, String password, String role) {
         User user = User.builder()
                 .name(name)
@@ -46,7 +47,7 @@ public class UserService {
 
     public User getUserByEmail(String email) {
         return userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
     }
 
 }

@@ -1,11 +1,11 @@
 package com.fse.FSE_Backend_Proj.dto.authDto;
 
 import com.fse.FSE_Backend_Proj.model.enums.UserRole;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
-@Getter
-@Setter
+@Data
+@AllArgsConstructor
+@Builder
 public class LoginRequest {
     private String email;
     private String password;

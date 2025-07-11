@@ -1,13 +1,14 @@
 package com.fse.FSE_Backend_Proj.dto.investorDto;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.Getter;
+import lombok.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
 @Data
+@AllArgsConstructor
+@NoArgsConstructor
+@Builder
 public class InvestorCreateRequest {
     private String userId;  // FK from User table
     private String panNumber;
