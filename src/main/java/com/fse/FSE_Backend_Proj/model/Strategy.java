@@ -1,7 +1,14 @@
 package com.fse.FSE_Backend_Proj.model;
 
+
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+import java.time.LocalDate;
+import java.util.List;
 
 @Entity
 @Data
@@ -14,16 +21,18 @@ public class Strategy {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String name;
-    private String type;
-    private Double capitalAllocation;
+    private String name;              // e.g. "RSI-Based Strategy"
+    private List<String> symbolList;            // Stock symbol like "TCS"
+    private String script;            // For user-defined DSL
+    private String paramsJson;
+    private String symbol;// JSON string for predefined param (optional)
 
-    private String status;  // not started, running, stopped, completed
+    private Double initialCapital;
 
-    @Column(length = 2000)
-    private String parametersJson;  // Store dynamic form values as JSON
+    private LocalDate startDate;
+    private LocalDate endDate;
 
-    @Column(length = 2000)
-    private String resultJson;      // Simulation result
-
+    private String status;                // not started, running, stopped, completed
+    @Column(length = 20000)
+    private String resultJson;            // Simulation result
 }

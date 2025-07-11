@@ -1,57 +1,51 @@
 package com.fse.FSE_Backend_Proj.controller;
 
-import com.fse.FSE_Backend_Proj.dto.strategyDto.StrategyDTO;
-import com.fse.FSE_Backend_Proj.service.StrategyService;
+
+import com.fse.FSE_Backend_Proj.dto.StrategyResponseDTO;
+import com.fse.FSE_Backend_Proj.model.Strategy;
+import com.fse.FSE_Backend_Proj.repository.StrategyRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/strategies")
 @RequiredArgsConstructor
 public class StrategyController {
 
-    private final StrategyService strategyService;
+    private final StrategyRepository strategyRepository;
+
+    @PostMapping
+    public StrategyResponseDTO saveStrategy(@RequestBody Strategy strategy) {
+        Strategy saved = strategyRepository.save(strategy);
+        return toDTO(saved);
+    }
 
     @GetMapping
-    public ResponseEntity<List<StrategyDTO>> getAllStrategies() {
-        return ResponseEntity.ok(strategyService.getAllStrategies());
+    public List<StrategyResponseDTO> getAllStrategies() {
+        return strategyRepository.findAll().stream()
+                .map(this::toDTO)
+                .collect(Collectors.toList());
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<StrategyDTO> getStrategyById(@PathVariable Long id) {
-        StrategyDTO strategy = strategyService.getStrategyById(id);
-        return ResponseEntity.ok(strategy);
+    public StrategyResponseDTO getById(@PathVariable Long id) {
+        return strategyRepository.findById(id)
+                .map(this::toDTO)
+                .orElseThrow(() -> new RuntimeException("Strategy not found"));
     }
 
-    @PostMapping
-    public ResponseEntity<StrategyDTO> saveStrategy(@RequestBody StrategyDTO dto) {
-        return ResponseEntity.ok(strategyService.saveStrategy(dto));
-    }
-
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteStrategy(@PathVariable Long id) {
-        strategyService.deleteStrategy(id);
-        return ResponseEntity.noContent().build();
-    }
-
-    @PostMapping("/{id}/start")
-    public ResponseEntity<StrategyDTO> startSimulation(@PathVariable Long id) {
-        return ResponseEntity.ok(strategyService.startSimulation(id));
-    }
-
-    @PostMapping("/{id}/stop")
-    public ResponseEntity<StrategyDTO> stopSimulation(@PathVariable Long id) {
-        return ResponseEntity.ok(strategyService.stopSimulation(id));
-    }
-
-    @PostMapping("/{id}/complete")
-    public ResponseEntity<StrategyDTO> completeSimulation(
-            @PathVariable Long id,
-            @RequestBody String resultJson
-    ) {
-        return ResponseEntity.ok(strategyService.completeSimulation(id, resultJson));
+    private StrategyResponseDTO toDTO(Strategy s) {
+        return StrategyResponseDTO.builder()
+                .id(s.getId())
+                .name(s.getName())
+                .symbol(s.getSymbol())
+                .script(s.getScript())
+                .paramsJson(s.getParamsJson())
+                .startDate(s.getStartDate())
+                .endDate(s.getEndDate())
+                .build();
     }
 }
