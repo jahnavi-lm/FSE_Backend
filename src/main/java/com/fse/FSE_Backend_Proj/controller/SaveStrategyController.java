@@ -1,7 +1,9 @@
 package com.fse.FSE_Backend_Proj.controller;
 
+import com.fse.FSE_Backend_Proj.dto.BacktestResultDTO;
 import com.fse.FSE_Backend_Proj.dto.StrategyRequest;
 import com.fse.FSE_Backend_Proj.dto.strategyDto.StrategyDTO;
+import com.fse.FSE_Backend_Proj.model.BacktestResult;
 import com.fse.FSE_Backend_Proj.model.Strategy;
 import com.fse.FSE_Backend_Proj.service.SaveStrategyService;
 import lombok.RequiredArgsConstructor;
@@ -44,6 +46,7 @@ public class SaveStrategyController {
         return ResponseEntity.ok(saveStrategyService.startSimulation(id));
     }
 
+
     @PostMapping("/{id}/stop")
     public ResponseEntity<StrategyRequest> stopSimulation(@PathVariable Long id) {
         return ResponseEntity.ok(saveStrategyService.stopSimulation(id));
@@ -56,4 +59,15 @@ public class SaveStrategyController {
     ) {
         return ResponseEntity.ok(saveStrategyService.completeSimulation(id, resultJson));
     }
+//    @GetMapping("/{id}/result")
+//    public ResponseEntity<BacktestResultDTO> getResultByStrategyId(@PathVariable Long id) {
+//        return ResponseEntity.ok(saveStrategyService.getBacktestResultForStrategy(id));
+//    }
+    @GetMapping("/result/{strategyId}")
+    public ResponseEntity<BacktestResult> getResultByStrategyId(@PathVariable Long strategyId) {
+        BacktestResult result = saveStrategyService.getBacktestResultByStrategyId(strategyId);
+        return ResponseEntity.ok(result);
+    }
+
+
 }
