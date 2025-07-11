@@ -12,6 +12,7 @@ public interface TransactionRepository extends JpaRepository<Transaction, String
 
     List<Transaction> findByInvestorId(String investorId);
 
-    @EntityGraph(attributePaths = {"fundScheme"}) // <-- Must be inside the interface
+    @EntityGraph(attributePaths = {"fundScheme"})
+        // <-- Must be inside the interface
     List<Transaction> findByInvestorIdAndFundSchemeId(String investorId, String schemeId); // <-- Move it here
-
+}
