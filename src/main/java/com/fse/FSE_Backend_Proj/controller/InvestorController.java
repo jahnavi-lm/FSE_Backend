@@ -60,6 +60,16 @@ public class InvestorController {
         return ResponseEntity.ok(investorService.getTransactions(investorId));
     }
 
+    @GetMapping("/transactions/{investorId}/scheme/{schemeId}")
+    public ResponseEntity<List<TransactionDto>> getInvestorTransactionsByScheme(
+            @PathVariable String investorId,
+            @PathVariable String schemeId) {
+        List<TransactionDto> transactions = investorService.getTransactionsByScheme(investorId, schemeId);
+        return ResponseEntity.ok(transactions);
+    }
+
+
+
     @GetMapping("/nav-history/{schemeId}")
     public ResponseEntity<List<NavHistoryDto>> getNavHistory(@PathVariable String schemeId) {
         return ResponseEntity.ok(investorService.getNavHistory(schemeId));

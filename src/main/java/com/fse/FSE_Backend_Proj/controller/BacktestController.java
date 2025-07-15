@@ -9,13 +9,12 @@ import com.fse.FSE_Backend_Proj.engine.StrategyEngine;
 import com.fse.FSE_Backend_Proj.model.BacktestResult;
 import com.fse.FSE_Backend_Proj.model.Candle;
 import com.fse.FSE_Backend_Proj.model.Strategy;
+import com.fse.FSE_Backend_Proj.repository.BacktestResultRepository;
 import com.fse.FSE_Backend_Proj.repository.CandleRepository;
 import com.fse.FSE_Backend_Proj.service.CandleGraphService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -31,6 +30,7 @@ public class BacktestController {
     private final CandleRepository candleRepository;
     private final StrategyEngine strategyEngine;
     private final CandleGraphService candleGraphService;
+    private final BacktestResultRepository backtestResultRepository;
 
     @PostMapping
     public BacktestResultDTO runBacktest(@RequestBody StrategyRequest request) {
@@ -151,6 +151,35 @@ public class BacktestController {
     public Map<String, List<CandleDataToShowInGraphDTO.CandlePoint>> candleData(@RequestBody StrategyRequest request) {
         return candleGraphService.getCandleDataForChart(request);
     }
+    @GetMapping("/result/{strategyId}")
+    public ResponseEntity<BacktestResultDTO> getResultByStrategyId(@PathVariable Long strategyId) {
+        BacktestResult result = backtestResultRepository
+                .findByStrategyId(strategyId)
+                .orElseThrow(() -> new RuntimeException("Result not found"));
+
+        BacktestResultDTO dto = BacktestResultDTO.builder()
+                .initialEquity(result.getInitialEquity())
+                .finalEquity(result.getFinalEquity())
+                .totalTrades(result.getTotalTrades())
+                .trades(result.getTrades().stream()
+                        .map(t -> TradeDTO.builder()
+                                .date(t.getDate().toString())
+                                .price(t.getPrice())
+                                .action(t.getAction())
+                                .symbol(t.getSymbol())
+                                .quantity(t.getQuantity())
+                                .totalCostPrice(t.getTotalCostPrice())
+                                .openingBalance(t.getOpeningBalance())
+                                .closingBalance(t.getClosingBalance())
+                                .nav(t.getNav())
+                                .realizedProfit(t.getRealizedProfit())
+                                .build())
+                        .collect(Collectors.toList()))
+                .build();
+
+        return ResponseEntity.ok(dto);
+    }
+
 
 }
 

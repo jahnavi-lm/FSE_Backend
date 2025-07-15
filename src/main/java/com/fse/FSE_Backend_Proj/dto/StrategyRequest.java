@@ -14,11 +14,15 @@ import java.util.List;
 @AllArgsConstructor
 @Builder
 public class StrategyRequest {
+    private Long id;
     private String strategyName;       // Optional: predefined strategy
     private String strategyScript;     // Optional: DSL-based script
     private List<String> symbolList;
     private LocalDate startDate;
     private LocalDate endDate;
-    private double initialCapital;
+    private Double initialCapital;
     private String symbol;// Optional, default = 10000
+
+    private String status;
+    private String resultJson;
 }

@@ -1,5 +1,6 @@
 package com.fse.FSE_Backend_Proj.dto.fundSchemeDto;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fse.FSE_Backend_Proj.dto.fundSchemeDto.CompanyInvestmentDto;
 import com.fse.FSE_Backend_Proj.model.CompanyInvestment;
 import com.fse.FSE_Backend_Proj.model.enums.FundSchemeStatus;
@@ -17,6 +18,7 @@ import java.util.List;
 @Getter
 @Setter
 public class FundSchemeRequestDto {
+
 
     @NotBlank
     private String name;
@@ -42,6 +44,7 @@ public class FundSchemeRequestDto {
     @NotBlank
     private String benchmarkIndex;
 
+    @JsonFormat(pattern = "yyyy-MM-dd")//newly added
     private LocalDate launchDate;
 
     @NotBlank

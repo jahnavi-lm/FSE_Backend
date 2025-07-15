@@ -113,6 +113,7 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .cors(cors -> cors.configurationSource(corsConfigurationSource())) // 👈 Explicitly set the source
                 .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/api/**").permitAll()
                         .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers("/api/public/**").permitAll()
                         .requestMatchers("/api/investors/**").permitAll()
@@ -124,6 +125,8 @@ public class SecurityConfig {
                         .requestMatchers("/api/import").permitAll()
                         .requestMatchers("/api/backtest").permitAll()
                         .requestMatchers("/api/backtest/candles").permitAll()
+                        .requestMatchers("/api/strategies/**").permitAll()
+                        .requestMatchers("/api/save-strategies/**").permitAll()
                         .requestMatchers("/error").permitAll()
                         .anyRequest().authenticated()
                 )
