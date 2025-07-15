@@ -8,10 +8,6 @@ import java.util.List;
 
 @Repository
 public interface CompanyInvestmentRepository extends JpaRepository<CompanyInvestment, String> {
-
-    // Optional: fetch all investments by FundScheme ID
     List<CompanyInvestment> findByFundScheme_Id(String fundSchemeId);
-
-    // Optional: fetch all investments by companyId (if needed)
-    List<CompanyInvestment> findByCompanyId(String companyId);
+    CompanyInvestment findByCompanyId(Long companyId);
 }

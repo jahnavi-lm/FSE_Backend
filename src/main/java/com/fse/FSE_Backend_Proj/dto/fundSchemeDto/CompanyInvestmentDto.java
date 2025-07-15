@@ -12,9 +12,10 @@ import java.time.LocalDate;
 @Builder
 public class CompanyInvestmentDto {
     private String id;
-    private String companyId;
+    private Long companyId;
     private String companyName;
     private BigDecimal investedAmount;
     private Integer numberOfStocks;
     private LocalDate investmentDate;
+    private String fundSchemeId;
 }

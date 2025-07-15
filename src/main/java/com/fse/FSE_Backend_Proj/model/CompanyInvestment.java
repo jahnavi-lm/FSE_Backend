@@ -19,9 +19,9 @@ public class CompanyInvestment {
     @GeneratedValue(strategy = GenerationType.UUID)
     private String id; // Auto-generated primary key
 
-    @NotBlank(message = "Company ID is required")
+    @NotNull(message = "Company ID cannot be null")
     @Column(name = "company_id", nullable = false)
-    private String companyId; // Manual input from request
+    private Long companyId;
 
     @NotBlank(message = "Company name is required")
     @Column(name = "company_name", nullable = false)

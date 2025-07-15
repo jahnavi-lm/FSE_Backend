@@ -7,5 +7,6 @@ import java.util.Optional;
 
 public interface CompanyRepository extends JpaRepository<Company, Long> {
     boolean existsBySymbol(String symbol);
-    Optional<Company> findBySymbol(String symbol); // ✅ Enables fetching Company entity by symbol
+    Optional findBySymbol(String symbol);
+    Company findCompanyById(Long id);// ✅ Enables fetching Company entity by symbol
 }

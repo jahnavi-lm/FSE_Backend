@@ -21,10 +21,9 @@ public class Company {
     private String symbol;       // e.g. RELIANCE.NS
     private String name;         // e.g. Reliance Industries
     private String indexName;    // e.g. NIFTY 50
-
     @Column(precision = 30, scale = 4)
     private BigDecimal totalCapital; // Market Cap
-
+    private BigDecimal nav;
     private Double riskFactor;   // Beta * Market Risk Premium
 }
 
