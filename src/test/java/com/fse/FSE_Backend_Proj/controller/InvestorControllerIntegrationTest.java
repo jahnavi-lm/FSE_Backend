@@ -7,6 +7,7 @@ import com.fse.FSE_Backend_Proj.model.FundScheme;
 import com.fse.FSE_Backend_Proj.model.User;
 import com.fse.FSE_Backend_Proj.model.enums.*;
 import com.fse.FSE_Backend_Proj.repository.AMCRepository;
+import com.fse.FSE_Backend_Proj.repository.FundManagerRepository;
 import com.fse.FSE_Backend_Proj.repository.InvestorRepository;
 import com.fse.FSE_Backend_Proj.repository.UserRepository;
 import com.fse.FSE_Backend_Proj.util.JWTUtil;
@@ -43,12 +44,14 @@ public class InvestorControllerIntegrationTest {
     @Autowired private PasswordEncoder passwordEncoder;
     @Autowired private JWTUtil jwtUtil;
     @Autowired private AMCRepository amcRepository;
+    @Autowired private FundManagerRepository fundManagerRepository;
 
     private String jwtToken;
     private String userId;
 
     @BeforeEach
     void setUp() {
+        fundManagerRepository.deleteAll(); // 👈 Clear dependent records first
         investorRepository.deleteAll();
         userRepository.deleteAll();
 
