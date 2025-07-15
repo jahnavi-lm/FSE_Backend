@@ -1,14 +1,12 @@
 package com.fse.FSE_Backend_Proj.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fse.FSE_Backend_Proj.model.enums.FundSchemeStatus;
 import com.fse.FSE_Backend_Proj.model.enums.FundSchemeType;
 import com.fse.FSE_Backend_Proj.model.enums.RiskLevel;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -17,7 +15,8 @@ import java.util.List;
 
 @Entity
 @Table(name = "fund_schemes")
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
@@ -106,9 +105,11 @@ public class FundScheme {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "fundScheme", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<CompanyInvestment> companiesInvestedIn;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "fundScheme", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Investor> investors;
 
@@ -120,5 +121,49 @@ public class FundScheme {
     @PreUpdate
     public void onUpdate() {
         this.updatedAt = LocalDateTime.now();
+    }
+
+    // ✅ Safe toString to avoid StackOverflowError
+    @Override
+    public String toString() {
+        return "FundScheme{" +
+                "id='" + id + '\'' +
+                ", name='" + name + '\'' +
+                ", type=" + type +
+                ", objective='" + objective + '\'' +
+                ", aum=" + aum +
+                ", currentNav=" + currentNav +
+                ", navUpdatedAt=" + navUpdatedAt +
+                ", riskLevel=" + riskLevel +
+                ", expenseRatio=" + expenseRatio +
+                ", exitLoad=" + exitLoad +
+                ", lockInPeriod=" + lockInPeriod +
+                ", minInvestment=" + minInvestment +
+                ", minSipAmount=" + minSipAmount +
+                ", benchmarkIndex='" + benchmarkIndex + '\'' +
+                ", launchDate=" + launchDate +
+                ", category='" + category + '\'' +
+                ", status=" + status +
+                ", createdAt=" + createdAt +
+                ", updatedAt=" + updatedAt +
+                ", investors=" + investorsSummary() +
+                ", companiesInvestedIn=" + companiesSummary() +
+                '}';
+    }
+
+    private String investorsSummary() {
+        if (investors == null) return "[]";
+        return investors.stream()
+                .map(inv -> "Investor{id=" + inv.getId() + ", name=" + inv.getUser() + "}")
+                .toList()
+                .toString();
+    }
+
+    private String companiesSummary() {
+        if (companiesInvestedIn == null) return "[]";
+        return companiesInvestedIn.stream()
+                .map(ci -> "Company{id=" + ci.getId() + ", name=" + ci.getCompanyName() + "}")
+                .toList()
+                .toString();
     }
 }

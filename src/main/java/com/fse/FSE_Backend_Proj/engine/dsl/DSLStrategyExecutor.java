@@ -288,6 +288,7 @@ public class DSLStrategyExecutor implements StrategyExecutor {
         for (int day = 0; day < totalDays; day++) {
             List<String> buySymbolsToday = Collections.synchronizedList(new ArrayList<>());
             Map<String, Candle> candleOfDay = new ConcurrentHashMap<>();
+
             ExecutorService executor = Executors.newFixedThreadPool(candleMap.size());
             List<Future<?>> futures = new ArrayList<>();
 
@@ -297,6 +298,7 @@ public class DSLStrategyExecutor implements StrategyExecutor {
                 if (day >= candles.size()) continue;
                 Candle candle = candles.get(day);
                 candleOfDay.put(symbol, candle);
+
                 final int finalDay = day;
 
                 futures.add(executor.submit(() -> {
@@ -321,15 +323,18 @@ public class DSLStrategyExecutor implements StrategyExecutor {
                                     alreadyBought = true;
                                     break;
                                 }
+
                                 if ("SELL".equalsIgnoreCase(rule.getAction()) && holding.getOrDefault(symbol, false)) {
                                     double sell = candle.getClose();
                                     int qty = quantity.get(symbol);
                                     double cost = qty * buyPrice.get(symbol);
                                     double proceeds = qty * sell;
                                     double profit = proceeds - cost;
+
                                     synchronized (capital) {
                                         double openingBalance = capital[0];
                                         capital[0] += proceeds;
+
                                         trades.add(Trade.builder()
                                                 .date(candle.getDate())
                                                 .symbol(symbol)
@@ -343,6 +348,7 @@ public class DSLStrategyExecutor implements StrategyExecutor {
                                                 .realizedProfit(profit)
                                                 .build());
                                     }
+
                                     holding.put(symbol, false);
                                     break;
                                 }
@@ -359,6 +365,7 @@ public class DSLStrategyExecutor implements StrategyExecutor {
                     e.printStackTrace();
                 }
             }
+            executor.shutdown();
 
             executor.shutdown();
 
@@ -386,9 +393,11 @@ public class DSLStrategyExecutor implements StrategyExecutor {
                     int qty = (int) (allocatedCapital / price);
                     if (qty <= 0) continue;
                     double cost = qty * price;
+
                     synchronized (capital) {
                         double openingBalance = capital[0];
                         capital[0] -= cost;
+
                         trades.add(Trade.builder()
                                 .date(candle.getDate())
                                 .symbol(symbol)
@@ -402,6 +411,7 @@ public class DSLStrategyExecutor implements StrategyExecutor {
                                 .realizedProfit(0.0)
                                 .build());
                     }
+
                     holding.put(symbol, true);
                     buyPrice.put(symbol, price);
                     quantity.put(symbol, qty);
@@ -420,6 +430,7 @@ public class DSLStrategyExecutor implements StrategyExecutor {
                 double cost = qty * buyPrice.get(symbol);
                 double proceeds = qty * sell;
                 double profit = proceeds - cost;
+
                 synchronized (capital) {
                     double openingBalance = capital[0];
                     capital[0] += proceeds;
@@ -436,6 +447,7 @@ public class DSLStrategyExecutor implements StrategyExecutor {
                             .realizedProfit(profit)
                             .build());
                 }
+
                 holding.put(symbol, false);
             }
         }
@@ -455,6 +467,7 @@ public class DSLStrategyExecutor implements StrategyExecutor {
 
     private double getValue(List<Candle> candles, String type, Integer arg, int index, Map<Integer, Map<String, Double>> cache) {
         cache.putIfAbsent(index, new ConcurrentHashMap<>());
+
         if (!type.equalsIgnoreCase("SMA") && !type.equalsIgnoreCase("RSI") &&
                 !type.equalsIgnoreCase("VALUE") && !type.equalsIgnoreCase("CLOSE")) {
             arg = Integer.parseInt(type);

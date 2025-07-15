@@ -1,6 +1,8 @@
 package com.fse.FSE_Backend_Proj.service.impl;
+
 import com.fse.FSE_Backend_Proj.dto.fundManagerDto.FundManagerRequestDto;
 import com.fse.FSE_Backend_Proj.dto.fundManagerDto.FundManagerResponseDto;
+import com.fse.FSE_Backend_Proj.dto.fundManagerDto.TotalAmount;
 import com.fse.FSE_Backend_Proj.dto.fundSchemeDto.CompanyInvestmentDto;
 import com.fse.FSE_Backend_Proj.dto.fundSchemeDto.FundSchemeResponseDto;
 import com.fse.FSE_Backend_Proj.exception.ResourceNotFoundException;
@@ -8,10 +10,13 @@ import com.fse.FSE_Backend_Proj.model.*;
 import com.fse.FSE_Backend_Proj.repository.*;
 import com.fse.FSE_Backend_Proj.service.FundManagerService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
@@ -22,15 +27,14 @@ public class FundManagerServiceImpl implements FundManagerService {
     private final UserRepository userRepository;
     private final AMCRepository amcRepository;
     private final FundSchemeRepository fundSchemeRepository;
+    private final CompanyRepository companyRepository;
+    private final CompanyInvestmentRepository companyInvestmentRepository;
+    private final FundManagerTransactionRepository fundManagerTransactionRepository;
 
     @Override
     public FundManagerResponseDto create(FundManagerRequestDto dto) {
-        System.out.println("Inside the create ctrl block 1");
-
         User user = userRepository.findById(dto.getUserId())
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
-
-        System.out.println("Inside the create ctrl block 2");
 
         if (fundManagerRepository.existsById(user.getId())) {
             throw new IllegalStateException("Fund Manager already exists for this user");
@@ -45,8 +49,6 @@ public class FundManagerServiceImpl implements FundManagerService {
                 .build();
 
         fm = fundManagerRepository.save(fm);
-
-        System.out.println("Inside the create ctrl block 3");
         return toDto(fm);
     }
 
@@ -68,7 +70,6 @@ public class FundManagerServiceImpl implements FundManagerService {
     public FundManagerResponseDto update(String id, FundManagerRequestDto dto) {
         FundManager fm = fundManagerRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Fund Manager not found"));
-
 
         fm.setEmployeeCode(dto.getEmployeeCode());
         fm.setQualification(dto.getQualification());
@@ -95,11 +96,11 @@ public class FundManagerServiceImpl implements FundManagerService {
                 .build();
     }
 
-
     @Override
     public List<FundSchemeResponseDto> getSchemesByFundManagerId(String id) {
-        FundManager fm = fundManagerRepository.findById(id)
+        fundManagerRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Fund Manager not found"));
+
         List<FundScheme> schemes = fundSchemeRepository.findByManager_Id(id);
         return schemes.stream()
                 .map(this::toFundSchemeDto)
@@ -141,12 +142,10 @@ public class FundManagerServiceImpl implements FundManagerService {
                 .build();
     }
 
-
-    private final CompanyInvestmentRepository companyInvestmentRepository;
     @Override
     public FundSchemeResponseDto UpdateSchemeById(String id, FundSchemeResponseDto dto) {
-        FundScheme fs = fundSchemeRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Fund Scheme not found with ID: " + id));
+        FundScheme fs = fundSchemeRepository.findById(id).
+                orElseThrow(() -> new ResourceNotFoundException("Fund Scheme not found with ID: " + id));
 
         fs.setName(dto.getName());
         fs.setType(dto.getType());
@@ -165,7 +164,6 @@ public class FundManagerServiceImpl implements FundManagerService {
         fs.setStatus(dto.getStatus());
 
         if (dto.getCompaniesInvestedIn() != null) {
-            // Clear existing
             fs.getCompaniesInvestedIn().clear();
 
             for (var investmentDto : dto.getCompaniesInvestedIn()) {
@@ -173,7 +171,6 @@ public class FundManagerServiceImpl implements FundManagerService {
 
                 if (investmentDto.getId() != null &&
                         companyInvestmentRepository.existsById(investmentDto.getId())) {
-                    // Update existing investment
                     investment = companyInvestmentRepository.findById(investmentDto.getId())
                             .orElseThrow(() -> new ResourceNotFoundException("CompanyInvestment not found"));
                     investment.setCompanyName(investmentDto.getCompanyName());
@@ -181,7 +178,6 @@ public class FundManagerServiceImpl implements FundManagerService {
                     investment.setNumberOfStocks(investmentDto.getNumberOfStocks());
                     investment.setInvestmentDate(investmentDto.getInvestmentDate());
                 } else {
-                    // New investment
                     investment = CompanyInvestment.builder()
                             .companyId(investmentDto.getCompanyId())
                             .companyName(investmentDto.getCompanyName())
@@ -192,9 +188,9 @@ public class FundManagerServiceImpl implements FundManagerService {
                             .build();
                 }
 
-                investment.setFundScheme(fs); // ensure fundScheme is always set
-                investment = companyInvestmentRepository.save(investment); // save or update
-                fs.getCompaniesInvestedIn().add(investment); // link to FundScheme
+                investment.setFundScheme(fs);
+                investment = companyInvestmentRepository.save(investment);
+                fs.getCompaniesInvestedIn().add(investment);
             }
         }
 
@@ -214,6 +210,164 @@ public class FundManagerServiceImpl implements FundManagerService {
         return toFundSchemeDto(updatedScheme);
     }
 
+    @Override
+    public TotalAmount getTotalAmount(String id) {
+        List<FundScheme> schemes = fundSchemeRepository.findByManager_Id(id);
+        BigDecimal totalAmount = BigDecimal.ZERO;
+        BigDecimal totalInvestedAmount = BigDecimal.ZERO;
 
+        for (FundScheme fs : schemes) {
+            if (fs.getAum() != null) {
+                totalAmount = totalAmount.add(fs.getAum());
+            }
 
+            for (CompanyInvestment cI : fs.getCompaniesInvestedIn()) {
+                if (cI.getInvestedAmount() != null) {
+                    totalInvestedAmount = totalInvestedAmount.add(cI.getInvestedAmount());
+                }
+            }
+        }
+
+        return TotalAmount.builder()
+                .TotalInvestedAmount(totalInvestedAmount)
+                .build();
+    }
+
+    @Override
+    public CompanyInvestmentDto buyStocks(String id, CompanyInvestmentDto dto) {
+        Company c = companyRepository.findCompanyById(dto.getCompanyId());
+        FundScheme fs = fundSchemeRepository.findById(dto.getFundSchemeId())
+                .orElseThrow(() -> new ResourceNotFoundException("Fund Scheme not found with ID: " + dto.getFundSchemeId()));
+
+        Integer nS = dto.getNumberOfStocks();
+        BigDecimal investmentAmount = c.getNav().multiply(BigDecimal.valueOf(nS));
+        BigDecimal aUm = fs.getAum();
+
+        CompanyInvestment existingInvestment = companyInvestmentRepository.findByCompanyId(c.getId());
+        CompanyInvestmentDto resultDto;
+
+        FundManagerTransaction.FundManagerTransactionBuilder transactionBuilder = FundManagerTransaction.builder()
+                .fundManager(fs.getManager())
+                .fundScheme(fs)
+                .fundSchemeName(fs.getName())
+                .companyId(c.getId().toString())
+                .companyName(c.getName())
+                .transactionType("BUY")
+                .numberOfStocks(nS)
+                .pricePerStock(c.getNav())
+                .totalValue(investmentAmount)
+                .transactionDate(LocalDateTime.now());
+
+        if (investmentAmount.compareTo(aUm) <= 0) {
+            fs.setAum(aUm.subtract(investmentAmount));
+            if (existingInvestment != null) {
+
+                existingInvestment.setNumberOfStocks(existingInvestment.getNumberOfStocks() + nS);
+                existingInvestment.setInvestedAmount(existingInvestment.getInvestedAmount().add(investmentAmount));
+                companyInvestmentRepository.save(existingInvestment);
+                resultDto = CompanyInvestmentDto.builder()
+                        .id(existingInvestment.getId())
+                        .companyId(existingInvestment.getCompanyId())
+                        .companyName(existingInvestment.getCompanyName())
+                        .investedAmount(existingInvestment.getInvestedAmount())
+                        .numberOfStocks(existingInvestment.getNumberOfStocks())
+                        .investmentDate(existingInvestment.getInvestmentDate())
+                        .fundSchemeId(fs.getId())
+                        .build();
+            } else {
+                CompanyInvestment newInvestment = CompanyInvestment.builder()
+                        .companyId(c.getId())
+                        .companyName(c.getName())
+                        .investedAmount(investmentAmount)
+                        .numberOfStocks(nS)
+                        .investmentDate(LocalDate.now())
+                        .fundScheme(fs)
+                        .build();
+                CompanyInvestment saved = companyInvestmentRepository.save(newInvestment);
+                System.out.println("newInvestment"+saved);
+                resultDto = CompanyInvestmentDto.builder()
+                        .id(saved.getId())
+                        .companyId(saved.getCompanyId())
+                        .companyName(saved.getCompanyName())
+                        .investedAmount(saved.getInvestedAmount())
+                        .numberOfStocks(saved.getNumberOfStocks())
+                        .investmentDate(saved.getInvestmentDate())
+                        .fundSchemeId(fs.getId())
+                        .build();
+            }
+
+            transactionBuilder.status("SUCCESS");
+            fundManagerTransactionRepository.save(transactionBuilder.build());
+            fundSchemeRepository.save(fs);
+            return resultDto;
+        } else {
+            transactionBuilder.status("FAILED");
+            fundManagerTransactionRepository.save(transactionBuilder.build());
+            throw new IllegalArgumentException("Insufficient AUM in fund scheme to buy stocks.");
+        }
+    }
+
+    @Override
+    public CompanyInvestmentDto sellStocks(String id, Long companyId, Integer stocksToSell) {
+        FundScheme fs = fundSchemeRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Fund Scheme not found with ID: " + id));
+
+        CompanyInvestment investment = companyInvestmentRepository.findByCompanyId(companyId);
+        Company company = companyRepository.findCompanyById(companyId);
+
+        BigDecimal nav = company.getNav();
+        BigDecimal sellAmount = nav.multiply(BigDecimal.valueOf(stocksToSell));
+
+        FundManagerTransaction.FundManagerTransactionBuilder transactionBuilder = FundManagerTransaction.builder()
+                .fundManager(fs.getManager())
+                .fundScheme(fs)
+                .fundSchemeName(fs.getName())
+                .companyId(company.getId().toString())
+                .companyName(company.getName())
+                .transactionType("SELL")
+                .numberOfStocks(stocksToSell)
+                .pricePerStock(nav)
+                .totalValue(sellAmount)
+                .transactionDate(LocalDateTime.now());
+
+        if (investment == null || investment.getFundScheme() == null ||
+                !investment.getFundScheme().getId().equals(fs.getId())) {
+            transactionBuilder.status("FAILED");
+            fundManagerTransactionRepository.save(transactionBuilder.build());
+            throw new IllegalArgumentException("No such investment under the specified fund scheme.");
+        }
+
+        Integer ownedStocks = investment.getNumberOfStocks();
+        if (stocksToSell > ownedStocks) {
+            transactionBuilder.status("FAILED");
+            fundManagerTransactionRepository.save(transactionBuilder.build());
+            throw new IllegalArgumentException("Not enough stocks to sell.");
+        }
+
+        fs.setAum(fs.getAum().add(sellAmount));
+        fundSchemeRepository.save(fs);
+
+        if (stocksToSell.equals(ownedStocks)) {
+            companyInvestmentRepository.delete(investment);
+        } else {
+            investment.setNumberOfStocks(ownedStocks - stocksToSell);
+            BigDecimal avgPricePerStock = investment.getInvestedAmount().divide(BigDecimal.valueOf(ownedStocks), 2, BigDecimal.ROUND_HALF_UP);
+            BigDecimal amountToSubtract = avgPricePerStock.multiply(BigDecimal.valueOf(stocksToSell));
+            investment.setInvestedAmount(investment.getInvestedAmount().subtract(amountToSubtract));
+            companyInvestmentRepository.save(investment);
+        }
+
+        transactionBuilder.status("SUCCESS");
+        fundManagerTransactionRepository.save(transactionBuilder.build());
+
+        return investment == null ? null : CompanyInvestmentDto.builder()
+                .id(investment.getId())
+                .companyId(investment.getCompanyId())
+                .companyName(investment.getCompanyName())
+                .investedAmount(investment.getInvestedAmount())
+                .numberOfStocks(investment.getNumberOfStocks())
+                .investmentDate(investment.getInvestmentDate())
+                .fundSchemeId(fs.getId())
+                .build();
+    }
 }

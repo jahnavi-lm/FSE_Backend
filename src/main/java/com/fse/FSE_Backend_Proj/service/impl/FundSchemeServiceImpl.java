@@ -4,10 +4,7 @@ import com.fse.FSE_Backend_Proj.dto.fundSchemeDto.FundSchemeRequestDto;
 import com.fse.FSE_Backend_Proj.dto.fundSchemeDto.FundSchemeResponseDto;
 import com.fse.FSE_Backend_Proj.exception.ResourceNotFoundException;
 import com.fse.FSE_Backend_Proj.model.*;
-import com.fse.FSE_Backend_Proj.repository.AMCRepository;
-import com.fse.FSE_Backend_Proj.repository.FundManagerRepository;
-import com.fse.FSE_Backend_Proj.repository.FundSchemeRepository;
-import com.fse.FSE_Backend_Proj.repository.InvestorRepository;
+import com.fse.FSE_Backend_Proj.repository.*;
 import com.fse.FSE_Backend_Proj.service.FundSchemeService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -24,6 +21,7 @@ public class FundSchemeServiceImpl implements FundSchemeService {
     private final AMCRepository amcRepo;
     private final FundManagerRepository fundManagerRepo;
     private final InvestorRepository investorRepo;
+    private final CompanyInvestmentRepository companyInvestmentRepository;
 
     @Override
     public FundSchemeResponseDto create(String amcId, FundSchemeRequestDto dto) {
@@ -69,6 +67,7 @@ public class FundSchemeServiceImpl implements FundSchemeService {
         return fundSchemeRepo.findByAmc_Id(amcId).stream().map(this::toDto).collect(Collectors.toList());
     }
 
+
 //    @Override
 //    public FundSchemeResponseDto update(String id, FundSchemeRequestDto dto) {
 //        FundScheme fs = getEntity(id);
@@ -113,6 +112,7 @@ public class FundSchemeServiceImpl implements FundSchemeService {
 //
 //        return toDto(fundSchemeRepo.save(fs));
 //    }
+
 
 
     @Override
@@ -229,6 +229,8 @@ public class FundSchemeServiceImpl implements FundSchemeService {
     public List<FundSchemeResponseDto> getByManager(String managerId) {
         return fundSchemeRepo.findByManager_Id(managerId).stream().map(this::toDto).collect(Collectors.toList());
     }
+
+
 
 }
 
