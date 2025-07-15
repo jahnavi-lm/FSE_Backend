@@ -11,15 +11,13 @@ import com.fse.FSE_Backend_Proj.model.Candle;
 import com.fse.FSE_Backend_Proj.model.Strategy;
 import com.fse.FSE_Backend_Proj.repository.BacktestResultRepository;
 import com.fse.FSE_Backend_Proj.repository.CandleRepository;
+import com.fse.FSE_Backend_Proj.repository.StrategyRepository;
 import com.fse.FSE_Backend_Proj.service.CandleGraphService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @RestController
@@ -31,10 +29,11 @@ public class BacktestController {
     private final StrategyEngine strategyEngine;
     private final CandleGraphService candleGraphService;
     private final BacktestResultRepository backtestResultRepository;
+    private final StrategyRepository strategyRepository;
 
     @PostMapping
     public BacktestResultDTO runBacktest(@RequestBody StrategyRequest request) {
-
+        System.out.println("Inside the runBacktest");
         List<String> symbolListToBeUse=new ArrayList<>();
         List<String>nifty50=List.of(
                 "HDFCBANK.NS", "ICICIBANK.NS", "RELIANCE.NS", "TCS.NS", "BHARTIARTL.NS", "INFY.NS", "BAJFINANCE.NS",
@@ -96,26 +95,27 @@ public class BacktestController {
                 "IOCL.NS",
                 "JINDALSTEL.NS");
 
-        List<String>symbolL=request.getSymbolList();
-        for(String k : symbolL){
-            if(k.equals("NIFTY 50")) {
+        List<String> symbolL = request.getSymbolList();
+        for (String k : symbolL) {
+            if (k.equals("NIFTY 50")) {
                 symbolListToBeUse.addAll(nifty50);
-            }else if(k.equals("NIFTY NEXT 50")){
+            } else if (k.equals("NIFTY NEXT 50")) {
                 symbolListToBeUse.addAll(niftyNext50);
-            }else if(k.equals("NIFTY NEXT 50")){
+            } else if (k.equals("NIFTY 100")) {
                 symbolListToBeUse.addAll(nifty50);
                 symbolListToBeUse.addAll(niftyNext50);
-            }else{
+            } else {
                 symbolListToBeUse.add(k);
             }
         }
-        HashMap<String,List<Candle>> CandleMap=new HashMap<>();
-        for(String s:symbolListToBeUse){
-            List<Candle> candles = candleRepository
-                    .findBySymbolAndDateBetweenOrderByDateAsc(
-                            s, request.getStartDate(), request.getEndDate());
-            CandleMap.put(s,candles);
+
+        HashMap<String, List<Candle>> candleMap = new HashMap<>();
+        for (String s : symbolListToBeUse) {
+            List<Candle> candles = candleRepository.findBySymbolAndDateBetweenOrderByDateAsc(
+                    s, request.getStartDate(), request.getEndDate());
+            candleMap.put(s, candles);
         }
+
         Strategy strategy = Strategy.builder()
                 .name(request.getStrategyName())
                 .symbolList(symbolListToBeUse)
@@ -123,13 +123,37 @@ public class BacktestController {
                 .startDate(request.getStartDate())
                 .endDate(request.getEndDate())
                 .build();
-        BacktestResult result = strategyEngine.run(strategy, CandleMap);
 
+        // Save or fetch existing strategy (you can use your own logic if Strategy already exists)
+        strategy = strategyRepository.save(strategy);
+
+        // 🔍 Check if BacktestResult already exists for this strategy
+        Optional<BacktestResult> existingResultOpt = backtestResultRepository.findByStrategyId(strategy.getId());
+        System.out.println(existingResultOpt +" this is existing result");
+
+        // 🧠 Run the backtest calculation
+        BacktestResult result = strategyEngine.run(strategy, candleMap);
+
+        // If result exists → update its fields
+        BacktestResult finalResult;
+        if (existingResultOpt.isPresent()) {
+            BacktestResult existing = existingResultOpt.get();
+            existing.setInitialEquity(result.getInitialEquity());
+            existing.setFinalEquity(result.getFinalEquity());
+            existing.setTotalTrades(result.getTotalTrades());
+            existing.setTrades(result.getTrades());
+            finalResult = backtestResultRepository.save(existing);
+        } else {
+            // Save new result
+            finalResult = backtestResultRepository.save(result);
+        }
+
+        // Build DTO
         return BacktestResultDTO.builder()
-                .initialEquity(result.getInitialEquity())
-                .finalEquity(result.getFinalEquity())
-                .totalTrades(result.getTotalTrades())
-                .trades(result.getTrades().stream()
+                .initialEquity(finalResult.getInitialEquity())
+                .finalEquity(finalResult.getFinalEquity())
+                .totalTrades(finalResult.getTotalTrades())
+                .trades(finalResult.getTrades().stream()
                         .map(t -> TradeDTO.builder()
                                 .date(String.valueOf(t.getDate()))
                                 .price(t.getPrice())
@@ -143,14 +167,13 @@ public class BacktestController {
                                 .realizedProfit(t.getRealizedProfit())
                                 .build())
                         .collect(Collectors.toList()))
-
                 .build();
     }
-
     @PostMapping ("/candles")
     public Map<String, List<CandleDataToShowInGraphDTO.CandlePoint>> candleData(@RequestBody StrategyRequest request) {
         return candleGraphService.getCandleDataForChart(request);
     }
+
     @GetMapping("/result/{strategyId}")
     public ResponseEntity<BacktestResultDTO> getResultByStrategyId(@PathVariable Long strategyId) {
         BacktestResult result = backtestResultRepository
