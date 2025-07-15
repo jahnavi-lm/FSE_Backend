@@ -15,4 +15,5 @@ public class FundManagerResponseDto {
     private String qualification;
     private int experienceYears;
     private String bio;
+    private String name;
 }

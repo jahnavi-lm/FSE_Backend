@@ -93,6 +93,7 @@ public class FundManagerServiceImpl implements FundManagerService {
                 .qualification(fm.getQualification())
                 .experienceYears(fm.getExperienceYears())
                 .bio(fm.getBio())
+                .name(fm.getUser().getName())
                 .build();
     }
 
