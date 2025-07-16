@@ -5,6 +5,7 @@ import com.fse.FSE_Backend_Proj.dto.fundManagerDto.FundManagerResponseDto;
 import com.fse.FSE_Backend_Proj.dto.fundManagerDto.TotalAmount;
 import com.fse.FSE_Backend_Proj.dto.fundSchemeDto.CompanyInvestmentDto;
 import com.fse.FSE_Backend_Proj.dto.fundSchemeDto.FundSchemeResponseDto;
+import com.fse.FSE_Backend_Proj.dto.strategyDto.StrategyAndBacktestCountDto;
 import com.fse.FSE_Backend_Proj.exception.ResourceNotFoundException;
 import com.fse.FSE_Backend_Proj.model.*;
 import com.fse.FSE_Backend_Proj.repository.*;
@@ -30,6 +31,8 @@ public class FundManagerServiceImpl implements FundManagerService {
     private final CompanyRepository companyRepository;
     private final CompanyInvestmentRepository companyInvestmentRepository;
     private final FundManagerTransactionRepository fundManagerTransactionRepository;
+    private final StrategyRepository strategyRepository;
+    private final BacktestResultRepository backtestResultRepository;
 
     @Override
     public FundManagerResponseDto create(FundManagerRequestDto dto) {
@@ -100,11 +103,48 @@ public class FundManagerServiceImpl implements FundManagerService {
     public List<FundSchemeResponseDto> getSchemesByFundManagerId(String id) {
         fundManagerRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Fund Manager not found"));
-
         List<FundScheme> schemes = fundSchemeRepository.findByManager_Id(id);
-        return schemes.stream()
+        List<FundSchemeResponseDto>resultScheme =schemes.stream()
                 .map(this::toFundSchemeDto)
                 .collect(Collectors.toList());
+
+        List<Company>companyData=companyRepository.findAll();
+        for (FundSchemeResponseDto scheme : resultScheme) {
+            BigDecimal totalCapital = scheme.getAum() != null ? scheme.getAum() : BigDecimal.ZERO;
+            BigDecimal totalPnL = BigDecimal.ZERO;
+
+            if (scheme.getCompaniesInvestedIn() != null) {
+                for (CompanyInvestmentDto investment : scheme.getCompaniesInvestedIn()) {
+                    Long companyId = investment.getCompanyId();
+                    Company company = companyData.stream()
+                            .filter(c -> c.getId().equals(companyId))
+                            .findFirst()
+                            .orElse(null);
+
+                    if (company != null && company.getNav() != null && investment.getNumberOfStocks() != null) {
+                        BigDecimal nav = company.getNav();
+                        BigDecimal stockQty = BigDecimal.valueOf(investment.getNumberOfStocks());
+                        BigDecimal currentValue = nav.multiply(stockQty);
+
+                        totalCapital = totalCapital.add(currentValue);
+
+                        BigDecimal investedAmount = investment.getInvestedAmount() != null
+                                ? investment.getInvestedAmount()
+                                : BigDecimal.ZERO;
+
+                        BigDecimal pnl = currentValue.subtract(investedAmount);
+                        totalPnL = totalPnL.add(pnl);
+                    }
+                }
+            }
+
+            scheme.setTotalCapital(totalCapital);
+            scheme.setPnl(totalPnL);
+        }
+
+
+
+        return resultScheme;
     }
 
     private FundSchemeResponseDto toFundSchemeDto(FundScheme fs) {
@@ -370,4 +410,13 @@ public class FundManagerServiceImpl implements FundManagerService {
                 .fundSchemeId(fs.getId())
                 .build();
     }
+
+    @Override
+    public StrategyAndBacktestCountDto getStrategyCount(){
+        StrategyAndBacktestCountDto result=new StrategyAndBacktestCountDto();
+        result.setStrategyCount(strategyRepository.count());
+        result.setBacktestCount(backtestResultRepository.count());
+        return result;
+    }
+
 }

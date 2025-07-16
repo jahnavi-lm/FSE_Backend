@@ -22,6 +22,8 @@ public class FundSchemeResponseDto {
     private FundSchemeType type;
     private String objective;
     private BigDecimal aum;
+    private BigDecimal totalCapital;
+    private BigDecimal pnl;
     private BigDecimal currentNav;
     private RiskLevel riskLevel;
     private BigDecimal expenseRatio;

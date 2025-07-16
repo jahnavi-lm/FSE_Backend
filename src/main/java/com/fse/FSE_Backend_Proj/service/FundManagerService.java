@@ -5,6 +5,7 @@ import com.fse.FSE_Backend_Proj.dto.fundManagerDto.FundManagerResponseDto;
 import com.fse.FSE_Backend_Proj.dto.fundManagerDto.TotalAmount;
 import com.fse.FSE_Backend_Proj.dto.fundSchemeDto.CompanyInvestmentDto;
 import com.fse.FSE_Backend_Proj.dto.fundSchemeDto.FundSchemeResponseDto;
+import com.fse.FSE_Backend_Proj.dto.strategyDto.StrategyAndBacktestCountDto;
 
 import java.util.List;
 
@@ -19,4 +20,5 @@ public interface FundManagerService {
     TotalAmount getTotalAmount(String id);
     CompanyInvestmentDto buyStocks(String id,CompanyInvestmentDto dto);
     CompanyInvestmentDto sellStocks(String fundSchemeId, Long companyId, Integer stocksToSell);
+    StrategyAndBacktestCountDto getStrategyCount();
 }

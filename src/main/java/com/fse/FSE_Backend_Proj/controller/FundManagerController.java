@@ -5,6 +5,8 @@ import com.fse.FSE_Backend_Proj.dto.fundManagerDto.FundManagerResponseDto;
 import com.fse.FSE_Backend_Proj.dto.fundManagerDto.TotalAmount;
 import com.fse.FSE_Backend_Proj.dto.fundSchemeDto.CompanyInvestmentDto;
 import com.fse.FSE_Backend_Proj.dto.fundSchemeDto.FundSchemeResponseDto;
+import com.fse.FSE_Backend_Proj.dto.fundSchemeDto.SellStockDto;
+import com.fse.FSE_Backend_Proj.dto.strategyDto.StrategyAndBacktestCountDto;
 import com.fse.FSE_Backend_Proj.model.FundScheme;
 import com.fse.FSE_Backend_Proj.repository.FundManagerRepository;
 import com.fse.FSE_Backend_Proj.service.FundManagerService;
@@ -77,12 +79,19 @@ public class FundManagerController {
         return ResponseEntity.ok(fundManagerService.getTotalAmount(id));
     }
 
-    @PutMapping("/buy/{id}")
+    @PostMapping("/buy/{id}")
     public ResponseEntity<CompanyInvestmentDto>buyStocks(@PathVariable String id,
                                                          @RequestBody CompanyInvestmentDto dto){
         return ResponseEntity.ok(fundManagerService.buyStocks(id,dto));
     }
+    @PostMapping("/sell")
+    public ResponseEntity<CompanyInvestmentDto>sellStock(@RequestBody SellStockDto dto){
+        return ResponseEntity.ok(fundManagerService.sellStocks(dto.getFundSchemeId(), dto.getCompanyId(), dto.getStocksToSell()));
+    }
 
-
+    @GetMapping("/strategies")
+    public ResponseEntity<StrategyAndBacktestCountDto>getStrategyCount(){
+        return ResponseEntity.ok(fundManagerService.getStrategyCount());
+    }
 
 }
