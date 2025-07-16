@@ -10,5 +10,5 @@ public interface BacktestResultRepository extends JpaRepository<BacktestResult, 
     // Optional — use only if you want to persist past results
 
     Optional<BacktestResult> findByStrategyId(Long strategyId);
-
+    long count();
 }
