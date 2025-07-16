@@ -77,7 +77,7 @@ public class FundManagerController {
         return ResponseEntity.ok(fundManagerService.getTotalAmount(id));
     }
 
-    @PutMapping("/buy/{id}")
+    @PostMapping("/buy/{id}")
     public ResponseEntity<CompanyInvestmentDto>buyStocks(@PathVariable String id,
                                                          @RequestBody CompanyInvestmentDto dto){
         return ResponseEntity.ok(fundManagerService.buyStocks(id,dto));
