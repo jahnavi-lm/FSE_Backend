@@ -34,7 +34,11 @@ public class DSLStrategyExecutor implements StrategyExecutor {
         Map<String, Integer> quantity = new ConcurrentHashMap<>();
         List<Trade> trades = Collections.synchronizedList(new ArrayList<>());
 
+
         double initialCapital = 500000;
+        if(strategy.getInitialCapital() != 0){
+            initialCapital = strategy.getInitialCapital();
+        }
         final double[] capital = {initialCapital};
 
         int totalDays = candleMap.values().stream().findFirst().map(List::size).orElse(0);

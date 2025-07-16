@@ -120,6 +120,7 @@ public class BacktestController {
                 .name(request.getStrategyName())
                 .symbolList(symbolListToBeUse)
                 .script(request.getStrategyScript())
+                .initialCapital(request.getInitialCapital())
                 .startDate(request.getStartDate())
                 .endDate(request.getEndDate())
                 .build();
