@@ -123,6 +123,8 @@ public class FundScheme {
         this.updatedAt = LocalDateTime.now();
     }
 
+
+
     // ✅ Safe toString to avoid StackOverflowError
     @Override
     public String toString() {
