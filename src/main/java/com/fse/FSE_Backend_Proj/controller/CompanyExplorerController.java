@@ -35,9 +35,9 @@ public class CompanyExplorerController {
         return ResponseEntity.ok(companyExplorerService.getCompaniesBySchemeId(schemeId));
     }
 
-    @GetMapping
-    public ResponseEntity<List<Company>> getAllCompanies() {
-        List<Company> companies = companyRepository.findAll();
-        return ResponseEntity.ok(companies);
-    }
+//    @GetMapping
+//    public ResponseEntity<List<Company>> getAllCompanies() {
+//        List<Company> companies = companyRepository.findAll();
+//        return ResponseEntity.ok(companies);
+//    }
 }
