@@ -330,7 +330,7 @@ public class FundManagerServiceImpl implements FundManagerService {
         FundScheme fs = fundSchemeRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Fund Scheme not found with ID: " + id));
 
-        CompanyInvestment investment = companyInvestmentRepository.findByCompanyId(companyId);
+        CompanyInvestment investment = companyInvestmentRepository.findByCompanyIdAndFundScheme_Id(companyId,id);
         Company company = companyRepository.findCompanyById(companyId);
 
         BigDecimal nav = company.getNav();
