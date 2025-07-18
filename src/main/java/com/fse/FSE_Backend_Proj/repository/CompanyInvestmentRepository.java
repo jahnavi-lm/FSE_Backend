@@ -10,4 +10,5 @@ import java.util.List;
 public interface CompanyInvestmentRepository extends JpaRepository<CompanyInvestment, String> {
     List<CompanyInvestment> findByFundScheme_Id(String fundSchemeId);
     CompanyInvestment findByCompanyId(Long companyId);
+    CompanyInvestment findByCompanyIdAndFundScheme_Id(Long companyId, String fundSchemeId);
 }

@@ -251,28 +251,6 @@ public class FundManagerServiceImpl implements FundManagerService {
         return toFundSchemeDto(updatedScheme);
     }
 
-    @Override
-    public TotalAmount getTotalAmount(String id) {
-        List<FundScheme> schemes = fundSchemeRepository.findByManager_Id(id);
-        BigDecimal totalAmount = BigDecimal.ZERO;
-        BigDecimal totalInvestedAmount = BigDecimal.ZERO;
-
-        for (FundScheme fs : schemes) {
-            if (fs.getAum() != null) {
-                totalAmount = totalAmount.add(fs.getAum());
-            }
-
-            for (CompanyInvestment cI : fs.getCompaniesInvestedIn()) {
-                if (cI.getInvestedAmount() != null) {
-                    totalInvestedAmount = totalInvestedAmount.add(cI.getInvestedAmount());
-                }
-            }
-        }
-
-        return TotalAmount.builder()
-                .TotalInvestedAmount(totalInvestedAmount)
-                .build();
-    }
 
     @Override
     public CompanyInvestmentDto buyStocks(String id, CompanyInvestmentDto dto) {
@@ -284,7 +262,7 @@ public class FundManagerServiceImpl implements FundManagerService {
         BigDecimal investmentAmount = c.getNav().multiply(BigDecimal.valueOf(nS));
         BigDecimal aUm = fs.getAum();
 
-        CompanyInvestment existingInvestment = companyInvestmentRepository.findByCompanyId(c.getId());
+        CompanyInvestment existingInvestment = companyInvestmentRepository.findByCompanyIdAndFundScheme_Id(c.getId(), fs.getId());
         CompanyInvestmentDto resultDto;
 
         FundManagerTransaction.FundManagerTransactionBuilder transactionBuilder = FundManagerTransaction.builder()

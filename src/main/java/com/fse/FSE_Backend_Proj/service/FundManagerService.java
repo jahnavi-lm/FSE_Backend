@@ -17,7 +17,6 @@ public interface FundManagerService {
     void delete(String id);
     List<FundSchemeResponseDto> getSchemesByFundManagerId(String id);
     FundSchemeResponseDto UpdateSchemeById (String id,FundSchemeResponseDto dto);
-    TotalAmount getTotalAmount(String id);
     CompanyInvestmentDto buyStocks(String id,CompanyInvestmentDto dto);
     CompanyInvestmentDto sellStocks(String fundSchemeId, Long companyId, Integer stocksToSell);
     StrategyAndBacktestCountDto getStrategyCount();
