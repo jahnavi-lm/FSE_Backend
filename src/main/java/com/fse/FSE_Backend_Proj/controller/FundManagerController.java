@@ -73,11 +73,7 @@ public class FundManagerController {
             @Valid @RequestBody FundSchemeResponseDto dto) {
         return ResponseEntity.ok(fundManagerService.UpdateSchemeById(id, dto));
     }
-
-    @GetMapping("/{id}/totalamount")
-    public ResponseEntity<TotalAmount>getTotalAmount(@PathVariable String id){
-        return ResponseEntity.ok(fundManagerService.getTotalAmount(id));
-    }
+    
 
     @PostMapping("/buy/{id}")
     public ResponseEntity<CompanyInvestmentDto>buyStocks(@PathVariable String id,
