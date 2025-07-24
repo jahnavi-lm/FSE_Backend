@@ -4,6 +4,7 @@ import com.fse.FSE_Backend_Proj.dto.fundManagerDto.FundManagerRequestDto;
 import com.fse.FSE_Backend_Proj.dto.fundManagerDto.FundManagerResponseDto;
 import com.fse.FSE_Backend_Proj.dto.fundManagerDto.TotalAmount;
 import com.fse.FSE_Backend_Proj.dto.fundSchemeDto.CompanyInvestmentDto;
+import com.fse.FSE_Backend_Proj.dto.fundSchemeDto.FundManagerTransactionDto;
 import com.fse.FSE_Backend_Proj.dto.fundSchemeDto.FundSchemeResponseDto;
 import com.fse.FSE_Backend_Proj.dto.strategyDto.StrategyAndBacktestCountDto;
 import com.fse.FSE_Backend_Proj.exception.ResourceNotFoundException;
@@ -104,18 +105,18 @@ public class FundManagerServiceImpl implements FundManagerService {
     public List<FundSchemeResponseDto> getSchemesByFundManagerId(String id) {
         fundManagerRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Fund Manager not found"));
-        List<FundScheme> schemes = fundSchemeRepository.findByManager_Id(id);
-        List<FundSchemeResponseDto>resultScheme =schemes.stream()
-                .map(this::toFundSchemeDto)
-                .collect(Collectors.toList());
 
-        List<Company>companyData=companyRepository.findAll();
-        for (FundSchemeResponseDto scheme : resultScheme) {
-            BigDecimal totalCapital = scheme.getAum() != null ? scheme.getAum() : BigDecimal.ZERO;
+        List<FundScheme> schemes = fundSchemeRepository.findByManager_Id(id);
+        List<Company> companyData = companyRepository.findAll();
+
+        return schemes.stream().map(scheme -> {
+            FundSchemeResponseDto responseDto = toFundSchemeDto(scheme);
+
+            BigDecimal totalCapital = responseDto.getAum() != null ? responseDto.getAum() : BigDecimal.ZERO;
             BigDecimal totalPnL = BigDecimal.ZERO;
 
-            if (scheme.getCompaniesInvestedIn() != null) {
-                for (CompanyInvestmentDto investment : scheme.getCompaniesInvestedIn()) {
+            if (responseDto.getCompaniesInvestedIn() != null) {
+                for (CompanyInvestmentDto investment : responseDto.getCompaniesInvestedIn()) {
                     Long companyId = investment.getCompanyId();
                     Company company = companyData.stream()
                             .filter(c -> c.getId().equals(companyId))
@@ -139,14 +140,19 @@ public class FundManagerServiceImpl implements FundManagerService {
                 }
             }
 
-            scheme.setTotalCapital(totalCapital);
-            scheme.setPnl(totalPnL);
-        }
+            responseDto.setTotalCapital(totalCapital);
+            responseDto.setPnl(totalPnL);
 
+            List<FundManagerTransaction> transactions = fundManagerTransactionRepository.findByFundScheme_Id(scheme.getId());
+            List<FundManagerTransactionDto> transactionDtos = transactions.stream()
+                    .map(this::toTransactionDto)
+                    .collect(Collectors.toList());
+            responseDto.setTransectionHistory(transactionDtos);
 
-
-        return resultScheme;
+            return responseDto;
+        }).collect(Collectors.toList());
     }
+
 
     private FundSchemeResponseDto toFundSchemeDto(FundScheme fs) {
         return FundSchemeResponseDto.builder()
@@ -397,5 +403,27 @@ public class FundManagerServiceImpl implements FundManagerService {
         result.setBacktestCount(backtestResultRepository.count());
         return result;
     }
+
+    private FundManagerTransactionDto toTransactionDto(FundManagerTransaction txn) {
+        String fundManagerName = txn.getFundManager() != null &&
+                txn.getFundManager().getUser() != null
+                ? txn.getFundManager().getUser().getName()
+                : "Unknown";
+
+        return FundManagerTransactionDto.builder()
+                .fundSchemeName(txn.getFundSchemeName())
+                .companyId(txn.getCompanyId())
+                .companyName(txn.getCompanyName())
+                .transactionType(txn.getTransactionType())
+                .status(txn.getStatus())
+                .numberOfStocks(txn.getNumberOfStocks())
+                .pricePerStock(txn.getPricePerStock())
+                .totalValue(txn.getTotalValue())
+                .transactionDate(txn.getTransactionDate())
+                .fundManagerName(fundManagerName)
+                .build();
+    }
+
+
 
 }

@@ -1,6 +1,7 @@
 package com.fse.FSE_Backend_Proj.dto.fundSchemeDto;
 
 import com.fse.FSE_Backend_Proj.dto.fundSchemeDto.CompanyInvestmentDto;
+import com.fse.FSE_Backend_Proj.model.FundManagerTransaction;
 import com.fse.FSE_Backend_Proj.model.enums.FundSchemeStatus;
 import com.fse.FSE_Backend_Proj.model.enums.FundSchemeType;
 import com.fse.FSE_Backend_Proj.model.enums.RiskLevel;
@@ -41,4 +42,6 @@ public class FundSchemeResponseDto {
     private LocalDateTime updatedAt;
     private List<CompanyInvestmentDto> companiesInvestedIn;
     private List<String> investorIds;
+    private List<FundManagerTransactionDto> transectionHistory;
+
 }

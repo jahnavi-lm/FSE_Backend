@@ -33,7 +33,6 @@ public class BacktestController {
 
     @PostMapping
     public BacktestResultDTO runBacktest(@RequestBody StrategyRequest request) {
-        System.out.println("Inside the runBacktest");
         List<String> symbolListToBeUse=new ArrayList<>();
         List<String>nifty50=List.of(
                 "HDFCBANK.NS", "ICICIBANK.NS", "RELIANCE.NS", "TCS.NS", "BHARTIARTL.NS", "INFY.NS", "BAJFINANCE.NS",
