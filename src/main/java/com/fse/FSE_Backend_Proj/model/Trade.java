@@ -22,7 +22,7 @@ public class Trade {
     private String action;
     private double price;
 
-    private String symbol; // 👈 Add this line
+    private String symbol;
     private int quantity;
     private double totalCostPrice;
     private double openingBalance;
