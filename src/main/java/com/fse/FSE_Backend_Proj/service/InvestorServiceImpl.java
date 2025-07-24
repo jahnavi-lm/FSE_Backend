@@ -52,7 +52,7 @@ public class InvestorServiceImpl implements InvestorService {
         }
 
         // ✅ Calculate units
-        BigDecimal units = amount.divide(nav, 4, RoundingMode.HALF_UP);
+        BigDecimal units = amount.divide(nav, 8, RoundingMode.HALF_UP);
 
         // ✅ Create and save transaction
         Transaction txn = Transaction.builder()
