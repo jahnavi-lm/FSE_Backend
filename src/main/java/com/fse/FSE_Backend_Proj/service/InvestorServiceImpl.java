@@ -264,7 +264,17 @@ public class InvestorServiceImpl implements InvestorService {
                 investor.getUser().getEmail(),
                 investor.isKycStatus(),
                 investor.getCreatedAt(),
-                investor.getUpdatedAt()
+                investor.getUpdatedAt(),
+                investor.getPanNumber(),
+                investor.getAddress(),
+                investor.getGuardianName(),
+                investor.getOccupation(),
+                investor.getAnnualIncome(),
+                investor.getNomineeName(),
+                investor.getBankAccountNo(),
+                investor.getIfscCode(),
+                investor.getDob(),
+                investor.getKycDocUrl()
         );
     }
 
@@ -314,8 +324,6 @@ public class InvestorServiceImpl implements InvestorService {
         if (investorRepository.existsByPanNumber(request.getPanNumber())) {
             throw new DuplicatePanException("PAN number already exists.");
         }
-
-
 
         Investor investor = Investor.builder()
                 .id(user.getId()) // Map userId
