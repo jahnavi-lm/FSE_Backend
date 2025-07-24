@@ -128,6 +128,8 @@ public class SecurityConfig {
                         .requestMatchers("/api/strategies/**").permitAll()
                         .requestMatchers("/api/save-strategies/**").permitAll()
                         .requestMatchers("/error").permitAll()
+                        .requestMatchers("/api/statistics/**").permitAll()
+                        .requestMatchers("/api/statistics").permitAll()
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
