@@ -86,9 +86,6 @@ A comprehensive Spring Boot-based backend application for financial services, pr
 - **Validation**: Jakarta Validation
 - **ORM**: Hibernate/JPA
 - **CORS**: Cross-Origin Resource Sharing enabled
-- **Validation**: Jakarta Validation
-- **ORM**: Hibernate/JPA
-- **CORS**: Cross-Origin Resource Sharing enabled
 
 ## 📋 Prerequisites
 
@@ -1057,13 +1054,6 @@ src/main/java/com/fse/FSE_Backend_Proj/
 │   ├── amcDto/            # AMC DTOs
 │   └── strategyDto/       # Strategy DTOs
 ├── engine/                # Trading strategy engine
-│   ├── builtin/          # Built-in strategies
-│   │   ├── BuyAndHoldStrategy.java
-│   │   ├── DayOfWeekStrategy.java
-│   │   ├── MovingAverageCrossover.java
-│   │   ├── RSIStrategy.java
-│   │   ├── ThresholdBasedStrategy.java
-│   │   └── VolumeSurgeStrategy.java
 │   ├── dsl/              # Domain-specific language
 │   │   └── DSLStrategyExecutor.java
 │   ├── StrategyEngine.java
@@ -1100,6 +1090,12 @@ src/main/java/com/fse/FSE_Backend_Proj/
 │   └── UnitLedger.java
 ├── parser/                # Data parsing utilities
 │   └── ScriptParserService.java
+├── engine/                # Trading strategy engine
+│   ├── builtin/          # Built-in strategies
+│   ├── dsl/              # Domain-specific language
+│   │   └── DSLStrategyExecutor.java
+│   ├── StrategyEngine.java
+│   └── StrategyExecutor.java
 ├── repository/            # Data access layer
 │   ├── UserRepository.java
 │   ├── InvestorRepository.java
@@ -1138,44 +1134,7 @@ src/main/java/com/fse/FSE_Backend_Proj/
     └── YahooFinanceParser.java
 ```
 
-## 🔧 Built-in Trading Strategies
 
-The application includes several pre-built trading strategies:
-
-### 1. Buy and Hold Strategy
-- **Description**: Long-term investment strategy
-- **Logic**: Buy stocks and hold them for the entire period
-- **Use Case**: Conservative, long-term investment approach
-
-### 2. Moving Average Crossover Strategy
-- **Description**: Technical analysis based on moving averages
-- **Logic**: Buy when short-term MA crosses above long-term MA, sell when it crosses below
-- **Parameters**: Short period (10), Long period (20)
-- **Use Case**: Trend-following strategy
-
-### 3. RSI Strategy
-- **Description**: Relative Strength Index based trading
-- **Logic**: Buy when RSI is oversold (< 30), sell when overbought (> 70)
-- **Parameters**: RSI period (14), oversold threshold (30), overbought threshold (70)
-- **Use Case**: Mean reversion strategy
-
-### 4. Day of Week Strategy
-- **Description**: Calendar-based trading patterns
-- **Logic**: Trade based on specific days of the week
-- **Parameters**: Target days, buy/sell signals
-- **Use Case**: Calendar effect exploitation
-
-### 5. Volume Surge Strategy
-- **Description**: Volume-based trading signals
-- **Logic**: Buy when volume is significantly above average
-- **Parameters**: Volume threshold multiplier
-- **Use Case**: Momentum trading
-
-### 6. Threshold Based Strategy
-- **Description**: Custom threshold-based rules
-- **Logic**: Buy/sell based on price thresholds
-- **Parameters**: Upper and lower price thresholds
-- **Use Case**: Range-bound trading
 
 ## 📊 Database Schema
 
