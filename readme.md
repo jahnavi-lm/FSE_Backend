@@ -2,40 +2,6 @@
 
 A comprehensive Spring Boot-based backend application for financial services, providing investment management, fund scheme administration, algorithmic trading strategies, and backtesting capabilities.
 
-## 🚀 Features
-
-### Core Functionality
-- **User Authentication & Authorization** - JWT-based authentication with role-based access control
-- **Investment Management** - Complete investment lifecycle management for investors
-- **Fund Scheme Administration** - AMC and Fund Manager operations
-- **Algorithmic Trading** - Strategy creation, execution, and backtesting
-- **Portfolio Management** - Real-time portfolio tracking and NAV calculations
-- **KYC Management** - Investor verification and compliance
-- **Market Data Integration** - Yahoo Finance data import and processing
-- **Company Explorer** - Comprehensive company and index management
-- **Statistics & Analytics** - Strategy and backtest result analytics
-
-### User Roles
-- **INVESTOR** - Individual investors managing their portfolios
-- **MANAGER** - Fund managers overseeing investment strategies
-- **AMC** - Asset Management Company administrators
-
-### Fund Scheme Types
-- **EQUITY** - Equity-focused investment schemes
-- **DEBT** - Fixed income and debt instruments
-- **HYBRID** - Balanced equity-debt portfolios
-- **ELSS** - Tax-saving equity-linked savings schemes
-- **INDEX** - Index-tracking passive funds
-
-### Risk Levels
-- **LOW** - Conservative investment approach
-- **MODERATE** - Balanced risk-return profile
-- **HIGH** - Aggressive growth strategies
-
-### Fund Scheme Status
-- **ACTIVE** - Currently accepting investments
-- **CLOSED** - Not accepting new investments
-- **MERGED** - Merged with another scheme
 
 ## 🚀 Features
 
