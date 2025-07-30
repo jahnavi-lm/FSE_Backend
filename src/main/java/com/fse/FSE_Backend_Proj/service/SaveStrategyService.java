@@ -113,9 +113,9 @@ public class SaveStrategyService {
                         "HDFCLIFE.NS",
                         "SBILIFE.NS",
                         "BAJAJ-AUTO.NS",
-                        "BAJAJFINSV.NS",     // 🔁 added
-                        "BRITANNIA.NS",      // 🔁 added
-                        "HDFC.NS",           // 🔁 added
+                        "BAJAJFINSV.NS",     // added
+                        "BRITANNIA.NS",      // added
+                        "HDFC.NS",           // added
                         "UPL.NS"  ));
             } else if (s.equals("NIFTY NEXT 50")) {
                 symbolListToUse.addAll(List.of("BOSCHLTD.NS",
